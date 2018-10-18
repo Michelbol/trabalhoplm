@@ -7,8 +7,6 @@ mostra_randomico_13: .asciz "\Numero Gerado no maximo 13: %d\n"
 numero: .asciz "\nNumero eh: %d\n"
 
 tempo: .int 4
-gera_carta: .int 3
-
 
 .section .text
 
@@ -29,26 +27,20 @@ addl $8, %esp
 call srand
 
 _gerador_cartas:
-movl gera_carta, %ecx
-pushl %ecx
-pushl $numero
-call printf
+movl $0x3, %ecx
 _gera_carta:
 pushl %ecx
 call rand
-popl %ecx
 pushl %eax #eax contem o numero randomico
-addl $4, %esp
 movl $0, %edx #limpando edx
 movl $0x13, %ebx
 divl %ebx
 pushl %edx #pegando o resto da divisao como aleatorio entre 0 e 13
 pushl $mostra_randomico_13
 call printf
-pushl %ecx
-pushl $numero
-call printf
-#loop _gera_carta
+addl $12, %esp
+popl %ecx
+loop _gera_carta
 
 finalizar_programa:
 pushl $0
