@@ -1,12 +1,26 @@
 .section .data
 
 msg_bem_vindo: .asciz "=============================================================\n|                    Bem vindo ao Truco 1.0                 |\n============================================================\n"
+tempo: .int 4
 mostra_tempo: .asciz "\nSemente Aleatoria: Tempo em Segundos = %d\n"
 mostra_randomico: .asciz "\nNumero Gerado: %d\n"
 mostra_randomico_13: .asciz "\Numero Gerado no maximo 13: %d\n"
-numero: .asciz "\nNumero eh: %d\n"
+print_numero: .asciz " %d"
+print_palavra: .asciz " %s"
+print_cartas: .asciz "As cartas da mão são:"
+teste: .asciz "cheguei aqui"
 
-tempo: .int 4
+cartas_maquina: .space 12
+sinais_cartas_maquina: .space 12
+cartas_jogador: .space 12
+sinais_cartas_jogador: .space 12
+
+cartas: .asciz "As    ", "2    ", "3     ", "4     ", "5      ", "6     ", "7     ", "Dama  ", "Valete", "Reis  "
+sinais: .asciz "ouros", "espada", "copas", "paus"
+manilha: .int 0
+sinal_manilha: .asciz ""
+vira: .asciz ""
+
 
 .section .text
 
@@ -21,10 +35,29 @@ addl $4, %esp #limpa a pilha
 _gerador_semente_aleatoria:
 pushl $tempo
 call time
-pushl $mostra_tempo
-call printf
-addl $8, %esp
+
+addl $4, %esp
 call srand
+
+printa_cartas:
+pushl $print_cartas
+call printf
+addl $4, %esp
+movl $0x10, %ecx
+movl $cartas, %edi
+loop_printa_cartas:
+pushl %edi
+pushl %ecx
+pushl %ecx
+
+pushl $print_numero
+call printf
+addl $4, %esp
+
+popl %ecx
+popl %edi
+loop loop_printa_cartas
+jmp finalizar_programa
 
 _gerador_cartas:
 movl $0x3, %ecx
