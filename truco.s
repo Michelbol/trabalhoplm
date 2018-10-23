@@ -1,6 +1,8 @@
 .section .data
 
-msg_bem_vindo: .asciz "=============================================================\n|                    Bem vindo ao Truco 1.0                 |\n =============================================================\n"
+msg_bem_vindo: .asciz "=============================================================\n|                    Bem vindo ao Truco 1.0                 |\n ===================================================================\n"
+msg_cartas: .asciz "Suas cartas são: \n"
+msg_carta:  .asciz "                 %s de %s\n"
 tempo: .int 4
 mostra_tempo: .asciz "\nSemente Aleatoria: Tempo em Segundos = %d\n"
 mostra_randomico: .asciz "\nNumero Gerado: %d\n"
@@ -12,6 +14,7 @@ print_cartas_sortiadas: .asciz "As cartas sortiadas foram: "
 print_sinais_sortiados: .asciz "Os sinais sortiados foram: "
 teste: .asciz "cheguei aqui"
 quebra_linha: .asciz "\n"
+print_cartas_iguais: .asciz "As cartas informadas são iguais: %s, %s \n"
 
 cartas_maquina: .space 21
 sinais_cartas_maquina: .space 21
@@ -26,6 +29,12 @@ manilha: .int 0
 sinal_manilha: .asciz ""
 vira: .asciz ""
 sinal_vira: .asciz ""
+cmp_carta1: .asciz ""
+cmp_carta2: .asciz ""
+cmp_carta3: .asciz ""
+cmp_sinal1: .asciz ""
+cmp_sinal2: .asciz ""
+cmp_sinal3: .asciz ""
 
 
 .section .text
@@ -77,9 +86,7 @@ loop    _gera_carta_maquina
 _gerador_sinais_cartas_maquina:
 movl    $3, %ecx                    #numero de sinais que serão geradas devem estar em ecx(instrução loop)
 movl    $sinais_cartas_maquina, %ebx
-#movl    $sinais_sortiados, %edx
 _gera_sinal_carta_maquina:
-#pushl   %edx
 pushl   %ecx                        #backup %ecx e %ebx que é o vetor
 pushl   %ebx
 call    rand                        #gera numero randomico
@@ -97,11 +104,8 @@ addl    %eax, %edi                  #movimento o vetor de acordo com a posição
 addl    $8, %esp                    #limpando a pilha
 popl    %ebx                        #recupegando os backup s
 popl    %ecx
-#popl    %edx
 movl    %edi, (%ebx)                #adicionando a carta ao vetor de cartas
 addl    $7, %ebx
-#movl    %eax, (%edx)
-#addl    $4, %edx
 loop    _gera_sinal_carta_maquina
 
 _gerador_cartas_jogador:
@@ -138,9 +142,7 @@ loop    _gera_carta_jogador
 _gerador_sinais_cartas_jogador:
 movl    $3, %ecx                    #numero de sinais que serão geradas devem estar em ecx(instrução loop)
 movl    $sinais_cartas_jogador, %ebx
-#movl    $sinais_sortiados, %edx
 _gera_sinal_carta_jogador:
-#pushl   %edx
 pushl   %ecx                        #backup %ecx e %ebx que é o vetor
 pushl   %ebx
 call    rand                        #gera numero randomico
@@ -158,12 +160,33 @@ addl    %eax, %edi                  #movimento o vetor de acordo com a posição
 addl    $8, %esp                    #limpando a pilha
 popl    %ebx                        #recupegando os backup s
 popl    %ecx
-#popl    %edx
 movl    %edi, (%ebx)                #adicionando a carta ao vetor de cartas
 addl    $7, %ebx
-#movl    %eax, (%edx)
-#addl    $4, %edx
 loop    _gera_sinal_carta_jogador
+
+#_verifica_cartas_repetidas:
+#movl    $3, %ecx
+#movl    $cartas_maquina, %ebx
+#movl    $sinais_cartas_maquina, %edi
+#_verifica_carta_repetida:
+#pushl   %ecx
+#pushl   %edi
+#pushl   %ebx
+#movl    %ebx, cmp_carta1
+#addl    $7, %ebx
+#movl    %ebx, cmp_carta2
+#cmpl    cmp_carta1, %ebx
+#je      _saoiguais
+
+
+#_saoiguais:
+#movl    $cmp_carta1, %eax
+#movl    $cmp_carta2, %ebx
+#pushl   (%eax)
+#pushl   (%ebx)
+#pushl   $print_cartas_iguais
+#call    printf
+#jmp     finalizar_programa
 
 _imprime_cartas_maquina:
 pushl   $print_cartas
@@ -217,7 +240,6 @@ popl    %ecx
 addl    $7, %ebx
 addl    $7, %edi
 loop    _impressao_cartas_jogador
-
 pushl   $quebra_linha
 call    printf
 
@@ -265,4 +287,3 @@ pushl   $quebra_linha
 call    printf
 pushl   $0
 call    exit
-
