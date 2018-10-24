@@ -37,21 +37,13 @@ cmp_sinal2: .asciz ""
 cmp_sinal3: .asciz ""
 
 
-.section .text
-
-.globl _start
-_start:
-
-_bem_vindo:
-pushl   $msg_bem_vindo
-call    printf
-addl    $4, %esp #limpa a pilha
-
 _gerador_semente_aleatoria:
 pushl   $tempo
 call    time
 pushl   tempo
 call    srand
+addl    $8, %esp
+    ret
 
 _gerador_cartas_maquina:
 movl    $3, %ecx                    #numero de cartas que serão geradas devem estar em ecx(instrução loop)
@@ -82,17 +74,20 @@ addl    $7, %ebx
 movl    %eax, (%edx)
 addl    $4, %edx
 loop    _gera_carta_maquina
+    ret
 
 _gerador_sinais_cartas_maquina:
 movl    $3, %ecx                    #numero de sinais que serão geradas devem estar em ecx(instrução loop)
 movl    $sinais_cartas_maquina, %ebx
+movl    $sinais_sortiados, %edx
 _gera_sinal_carta_maquina:
-pushl   %ecx                        #backup %ecx e %ebx que é o vetor
+pushl   %edx
+pushl   %ecx                        #backup %ecx, %ebx e %edx que é o vetor
 pushl   %ebx
 call    rand                        #gera numero randomico
 pushl   %eax                        #eax contem o numero randomico
 movl    $0, %edx                    #limpando edx
-movl    $4, %ebx                   #iremos pegar apenas numeros entre 0 e 9 assim teremos que dividir por 10
+movl    $4, %ebx                   #iremos pegar apenas numeros entre 0 e 4 assim teremos que dividir por 4
 divl    %ebx
 pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 9
 movl    %edx, %eax                  #salvo o random em %eax
@@ -104,10 +99,14 @@ addl    %eax, %edi                  #movimento o vetor de acordo com a posição
 addl    $8, %esp                    #limpando a pilha
 popl    %ebx                        #recupegando os backup s
 popl    %ecx
+popl    %edx
 movl    %edi, (%ebx)                #adicionando a carta ao vetor de cartas
 addl    $7, %ebx
+movl    %eax, (%edx)
+addl    $4, %edx
 loop    _gera_sinal_carta_maquina
-
+    ret
+    
 _gerador_cartas_jogador:
 movl    $3, %ecx                    #numero de cartas que serão geradas devem estar em ecx(instrução loop)
 movl    $cartas_jogador, %ebx
@@ -138,7 +137,8 @@ addl    $7, %ebx
 movl    %eax, (%edx)
 addl    $4, %edx
 loop    _gera_carta_jogador
-
+    ret
+    
 _gerador_sinais_cartas_jogador:
 movl    $3, %ecx                    #numero de sinais que serão geradas devem estar em ecx(instrução loop)
 movl    $sinais_cartas_jogador, %ebx
@@ -163,31 +163,8 @@ popl    %ecx
 movl    %edi, (%ebx)                #adicionando a carta ao vetor de cartas
 addl    $7, %ebx
 loop    _gera_sinal_carta_jogador
-
-#_verifica_cartas_repetidas:
-#movl    $3, %ecx
-#movl    $cartas_maquina, %ebx
-#movl    $sinais_cartas_maquina, %edi
-#_verifica_carta_repetida:
-#pushl   %ecx
-#pushl   %edi
-#pushl   %ebx
-#movl    %ebx, cmp_carta1
-#addl    $7, %ebx
-#movl    %ebx, cmp_carta2
-#cmpl    cmp_carta1, %ebx
-#je      _saoiguais
-
-
-#_saoiguais:
-#movl    $cmp_carta1, %eax
-#movl    $cmp_carta2, %ebx
-#pushl   (%eax)
-#pushl   (%ebx)
-#pushl   $print_cartas_iguais
-#call    printf
-#jmp     finalizar_programa
-
+    ret 
+    
 _imprime_cartas_maquina:
 pushl   $print_cartas
 call    printf
@@ -212,10 +189,11 @@ popl    %ecx
 addl    $7, %ebx
 addl    $7, %edi
 loop    _impressao_cartas_maquina
-
 pushl   $quebra_linha
 call    printf
-
+addl    $4, %esp
+    ret
+    
 _imprime_cartas_jogador:
 pushl   $print_cartas
 call    printf
@@ -242,7 +220,9 @@ addl    $7, %edi
 loop    _impressao_cartas_jogador
 pushl   $quebra_linha
 call    printf
-
+addl    $4, %esp
+    ret
+    
 _imprime_cartas_sortiadas:
 pushl   $print_cartas_sortiadas
 call    printf
@@ -260,9 +240,46 @@ popl    %ebx
 addl    $4, %ebx
 popl    %ecx
 loop    _impressao_cartas_sortiadas
-
 pushl   $quebra_linha
 call    printf
+addl    $4, %esp
+    ret
+
+_compara_vetores:
+movl    (%edi), %eax
+movl    (%esi), %ebx
+cmpl    %eax, %ebx
+jnz     acabou
+addl    $4, %edi
+addl    $4, %esi
+loop    _compara_vetores
+cmpl    %eax, %eax
+acabou:
+    ret
+
+.globl _start
+_start:
+
+_bem_vindo:
+pushl   $msg_bem_vindo
+call    printf
+addl    $4, %esp #limpa a pilha
+
+call _gerador_semente_aleatoria
+
+call _gerador_cartas_maquina
+
+call _gerador_sinais_cartas_maquina
+
+call _gerador_cartas_jogador
+
+call _gerador_sinais_cartas_jogador
+
+call _imprime_cartas_maquina
+
+call _imprime_cartas_jogador
+
+call _imprime_cartas_sortiadas
 
 _imprime_sinais_cartas_sortiadas:
 pushl   $print_sinais_sortiados
