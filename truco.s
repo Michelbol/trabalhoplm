@@ -10,25 +10,30 @@ mostra_randomico_13: .asciz "\Numero Gerado no maximo 13: %d\n"
 print_numero: .asciz " %d"
 print_palavra: .asciz " %s"
 print_cartas: .asciz "As cartas da mão são:"
+print_vira: .asciz "A vira eh: "
 print_cartas_sortiadas: .asciz "As cartas sortiadas foram: "
 print_sinais_sortiados: .asciz "Os sinais sortiados foram: "
 teste: .asciz "cheguei aqui"
 quebra_linha: .asciz "\n"
 print_cartas_iguais: .asciz "As cartas informadas são iguais: %s, %s \n"
+contador: .int 0
+print_iguais: .asciz "Estas cartas são iguais! %d e %d"
+print_diferentes: .asciz "Estas cartas são diferentes!"
+print_comparando: .asciz "Comparando %d e %d"
 
-cartas_maquina: .space 21
-sinais_cartas_maquina: .space 21
-cartas_jogador: .space 21
-sinais_cartas_jogador: .space 21
+cartas_maquina: .space 28
+sinais_cartas_maquina: .space 28
+cartas_jogador: .space 28
+sinais_cartas_jogador: .space 28
 
-cartas: .asciz "As    ", "2     ", "3     ", "4     ", "5     ", "6     ", "7     ", "Dama  ", "Valete", "Reis  "
+cartas: .asciz "4     ", "5     ", "6     ", "7     ", "Dama  ", "Valete", "Reis  ", "As    ", "2     ", "3     "
 sinais: .asciz "Ouros ", "Espada", "Copas ", "Paus  "
-cartas_sortiadas: .space 14
-sinais_sortiados: .space 14
+cartas_sortiadas: .space 32
+sinais_sortiados: .space 32
 manilha: .int 0
 sinal_manilha: .asciz ""
-vira: .asciz ""
-sinal_vira: .asciz ""
+vira: .space 14
+sinal_vira: .space 14
 cmp_carta1: .asciz ""
 cmp_carta2: .asciz ""
 cmp_carta3: .asciz ""
@@ -98,7 +103,7 @@ movl    $sinais, %edi               #salvo vetor em %edi para movimentar
 addl    %eax, %edi                  #movimento o vetor de acordo com a posição que foi calculada (7 * random) = posição do vetor
 addl    $8, %esp                    #limpando a pilha
 popl    %ebx                        #recupegando os backup s
-popl    %ecx
+popl    %ecx    
 popl    %edx
 movl    %edi, (%ebx)                #adicionando a carta ao vetor de cartas
 addl    $7, %ebx
@@ -139,10 +144,67 @@ addl    $4, %edx
 loop    _gera_carta_jogador
     ret
     
+_gera_vira:
+movl    $vira, %ebx
+movl    $cartas_sortiadas, %edx
+addl    $24, %edx
+pushl   %edx
+pushl   %ebx
+call    rand                        #gera numero randomico
+pushl   %eax                        #eax contem o numero randomico
+movl    $0, %edx                    #limpando edx
+movl    $10, %ebx                   #iremos pegar apenas numeros entre 0 e 9 assim teremos que dividir por 10
+divl    %ebx
+pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 9
+movl    %edx, %eax                  #salvo o random em %eax
+movl    $0, %edx                    #limpando edx
+movl    $7, %ebx                    #multiplico por 7 pois é o número de caracteres nos vetores
+mull    %ebx
+movl    $cartas, %edi               #salvo vetor em %edi para movimentar
+addl    %eax, %edi                  #movimento o vetor de acordo com a posição que foi calculada (7 * random) = posição do vetor
+addl    $8, %esp                    #limpando a pilha
+popl    %ebx                        #recupegando os backup s
+popl    %edx
+movl    %edi, (%ebx)                #adicionando a carta ao vetor de cartas
+addl    $7, %ebx
+movl    %eax, (%edx)
+addl    $4, %edx
+    ret
+    
+_gera_sinal_vira:
+movl    $sinal_vira, %ebx
+movl    $sinais_sortiados, %edx
+addl    $24, %edx
+pushl   %edx
+pushl   %ebx
+call    rand                        #gera numero randomico
+pushl   %eax                        #eax contem o numero randomico
+movl    $0, %edx                    #limpando edx
+movl    $4, %ebx                   #iremos pegar apenas numeros entre 0 e 9 assim teremos que dividir por 10
+divl    %ebx
+pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 9
+movl    %edx, %eax                  #salvo o random em %eax
+movl    $0, %edx                    #limpando edx
+movl    $7, %ebx                    #multiplico por 7 pois é o número de caracteres nos vetores
+mull    %ebx
+movl    $sinais, %edi               #salvo vetor em %edi para movimentar
+addl    %eax, %edi                  #movimento o vetor de acordo com a posição que foi calculada (7 * random) = posição do vetor
+addl    $8, %esp                    #limpando a pilha
+popl    %ebx                        #recupegando os backup s
+popl    %edx
+movl    %edi, (%ebx)                #adicionando a carta ao vetor de cartas
+addl    $7, %ebx
+movl    %eax, (%edx)
+addl    $4, %edx
+    ret 
+    
 _gerador_sinais_cartas_jogador:
 movl    $3, %ecx                    #numero de sinais que serão geradas devem estar em ecx(instrução loop)
 movl    $sinais_cartas_jogador, %ebx
+movl    $sinais_sortiados, %edx
+addl    $12, %edx
 _gera_sinal_carta_jogador:
+pushl   %edx
 pushl   %ecx                        #backup %ecx e %ebx que é o vetor
 pushl   %ebx
 call    rand                        #gera numero randomico
@@ -160,11 +222,38 @@ addl    %eax, %edi                  #movimento o vetor de acordo com a posição
 addl    $8, %esp                    #limpando a pilha
 popl    %ebx                        #recupegando os backup s
 popl    %ecx
+popl    %edx
 movl    %edi, (%ebx)                #adicionando a carta ao vetor de cartas
 addl    $7, %ebx
+movl    %eax, (%edx)
+addl    $4, %edx
 loop    _gera_sinal_carta_jogador
     ret 
     
+    
+_imprime_vira:
+pushl   $print_vira
+call    printf
+addl    $4, %esp
+movl    $vira, %ebx
+movl    $sinal_vira, %edi
+pushl   %ebx
+pushl   %edi
+pushl   (%ebx)
+pushl   $print_palavra
+call    printf
+pushl   (%edi)
+pushl   $print_palavra
+call    printf
+addl    $16, %esp
+popl    %edi
+popl    %ebx
+pushl   $quebra_linha
+call    printf
+addl    $4, %esp
+    ret
+
+
 _imprime_cartas_maquina:
 pushl   $print_cartas
 call    printf
@@ -244,18 +333,60 @@ pushl   $quebra_linha
 call    printf
 addl    $4, %esp
     ret
-
-_compara_vetores:
-movl    (%edi), %eax
-movl    (%esi), %ebx
+    
+_imprime_sinais_cartas_sortiadas:
+pushl   $print_sinais_sortiados
+call    printf
+addl    $4, %esp
+movl    $7, %ecx
+movl    $sinais_sortiados, %ebx
+_impressao_sinais_cartas_sortiadas:
+pushl   %ecx
+pushl   %ebx
+pushl   (%ebx)
+pushl   $print_numero
+call    printf
+addl    $8, %esp
+popl    %ebx
+addl    $4, %ebx
+popl    %ecx
+loop    _impressao_sinais_cartas_sortiadas
+pushl   $quebra_linha
+call    printf
+addl    $4, %esp
+    ret
+##### O valor a ser comparado deve estar em %eax
+_verifica_carta:
+pushl   %ecx
+pushl   %edi
+pushl   %eax
+pushl   (%edi)
+pushl   %ebx
+pushl   $print_comparando
+call    printf
+addl    $12, %esp
+popl    %eax
+popl    %edi
+popl    %ecx
+movl    $cartas_sortiadas, %edi
+movl    (%edi), %ebx
 cmpl    %eax, %ebx
-jnz     acabou
+je      _verifica_sinal
 addl    $4, %edi
-addl    $4, %esi
-loop    _compara_vetores
+addl    $1, contador
+loop    _verifica_carta
 cmpl    %eax, %eax
 acabou:
     ret
+    
+_verifica_sinal:
+pushl   %eax
+pushl   %ebx
+pushl   $print_iguais
+call    printf
+jmp     finalizar_programa
+ret
+#####
 
 .globl _start
 _start:
@@ -275,29 +406,23 @@ call _gerador_cartas_jogador
 
 call _gerador_sinais_cartas_jogador
 
+call _gera_vira
+
+call _gera_sinal_vira
+
 call _imprime_cartas_maquina
 
 call _imprime_cartas_jogador
 
 call _imprime_cartas_sortiadas
 
-_imprime_sinais_cartas_sortiadas:
-pushl   $print_sinais_sortiados
-call    printf
-addl    $4, %esp
-movl    $7, %ecx
-movl    $sinais_sortiados, %ebx
-_impressao_sinais_cartas_sortiadas:
-pushl   %ecx
-pushl   %ebx
-pushl   (%ebx)
-pushl   $print_numero
-call    printf
-addl    $8, %esp
-popl    %ebx
-addl    $4, %ebx
-popl    %ecx
-loop    _impressao_sinais_cartas_sortiadas
+call _imprime_sinais_cartas_sortiadas
+
+call _imprime_vira
+
+movl    $63, %eax
+movl    $28, %ecx
+call _verifica_carta
 
 finalizar_programa:
 pushl   $quebra_linha
