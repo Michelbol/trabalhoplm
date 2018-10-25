@@ -19,7 +19,7 @@ print_cartas_iguais: .asciz "As cartas informadas são iguais: %s, %s \n"
 contador: .int 0
 print_iguais: .asciz "Estas cartas são iguais! %d e %d"
 print_diferentes: .asciz "Estas cartas são diferentes!"
-print_comparando: .asciz "Comparando %d e %d"
+print_comparando: .asciz "Comparando %d e %d\n"
 
 cartas_maquina: .space 28
 sinais_cartas_maquina: .space 28
@@ -356,32 +356,48 @@ call    printf
 addl    $4, %esp
     ret
 ##### O valor a ser comparado deve estar em %eax
+_proximo_elemento_vetor:
+addl    $1, contador
+addl    $0, %edx
+movl    contador, %eax
+movl    $4, %ebx
+mull    %ebx
+movl    $cartas_sortiadas, %edi
+addl    %eax, %edi
+movl    (%edi), %eax
+addl    $4, %edi
+jmp     _loop_verifica_carta
 _verifica_carta:
+movl    $6, %ecx
+movl    $cartas_sortiadas, %edi
+movl    (%edi), %eax
+addl    $4, %edi
+_loop_verifica_carta:
 pushl   %ecx
 pushl   %edi
 pushl   %eax
 pushl   (%edi)
-pushl   %ebx
+pushl   %eax
 pushl   $print_comparando
 call    printf
 addl    $12, %esp
 popl    %eax
 popl    %edi
 popl    %ecx
-movl    $cartas_sortiadas, %edi
 movl    (%edi), %ebx
 cmpl    %eax, %ebx
 je      _verifica_sinal
 addl    $4, %edi
-addl    $1, contador
-loop    _verifica_carta
+loop    _loop_verifica_carta
+movl    contador, %eax
+movl    $6, %ebx
+cmpl    %eax, %ebx
+jne     _proximo_elemento_vetor
 cmpl    %eax, %eax
 acabou:
     ret
     
 _verifica_sinal:
-pushl   %eax
-pushl   %ebx
 pushl   $print_iguais
 call    printf
 jmp     finalizar_programa
@@ -420,8 +436,6 @@ call _imprime_sinais_cartas_sortiadas
 
 call _imprime_vira
 
-movl    $63, %eax
-movl    $28, %ecx
 call _verifica_carta
 
 finalizar_programa:
