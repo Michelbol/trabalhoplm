@@ -366,6 +366,7 @@ movl    $cartas_sortiadas, %edi
 addl    %eax, %edi
 movl    (%edi), %eax
 addl    $4, %edi
+movl    $6, %ecx
 jmp     _loop_verifica_carta
 _verifica_carta:
 movl    $6, %ecx
