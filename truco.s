@@ -358,7 +358,7 @@ addl    $4, %esp
 ##### O valor a ser comparado deve estar em %eax
 _proximo_elemento_vetor:
 addl    $1, contador
-addl    $0, %edx
+movl    $0, %edx
 movl    contador, %eax
 movl    $4, %ebx
 mull    %ebx
@@ -366,7 +366,11 @@ movl    $cartas_sortiadas, %edi
 addl    %eax, %edi
 movl    (%edi), %eax
 addl    $4, %edi
+pushl   %eax
+movl    contador, %eax
 movl    $6, %ecx
+subl    %eax, %ecx
+popl    %eax
 jmp     _loop_verifica_carta
 _verifica_carta:
 movl    $6, %ecx
@@ -391,7 +395,7 @@ je      _verifica_sinal
 addl    $4, %edi
 loop    _loop_verifica_carta
 movl    contador, %eax
-movl    $6, %ebx
+movl    $5, %ebx
 cmpl    %eax, %ebx
 jne     _proximo_elemento_vetor
 cmpl    %eax, %eax
@@ -399,6 +403,10 @@ acabou:
     ret
     
 _verifica_sinal:
+movl    contador, %eax
+movl    %ecx, %ebx
+pushl   %eax
+pushl   %ebx
 pushl   $print_iguais
 call    printf
 jmp     finalizar_programa
