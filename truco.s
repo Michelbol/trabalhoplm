@@ -404,9 +404,29 @@ acabou:
     
 _verifica_sinal:
 movl    contador, %eax
-movl    %ecx, %ebx
+movl    %ecx, %edi
+pushl   %edi
 pushl   %eax
+movl    %edi, %eax
+movl    $4, %ebx
+mull    %ebx
+movl    %eax, %ebx
+popl    %edi
+subl    $4, %ebx
 pushl   %ebx
+movl    %edi, %eax
+movl    $4, %ebx
+mull    %ebx
+pushl   %eax
+movl    $sinais_sortiados, %edi
+popl    %eax
+popl    %ebx
+addl    %eax, %edi
+pushl   (%edi)
+subl    %eax, %edi
+addl    $32, %edi
+subl    %ebx, %edi
+pushl   (%edi)
 pushl   $print_iguais
 call    printf
 jmp     finalizar_programa
