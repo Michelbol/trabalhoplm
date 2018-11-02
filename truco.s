@@ -20,6 +20,7 @@ contador: .int 0
 print_iguais: .asciz "Estas cartas são iguais! %d e %d"
 print_diferentes: .asciz "Estas cartas são diferentes!"
 print_comparando: .asciz "Comparando %d e %d\n"
+print_gerou_certo: .asciz "deu certo caraio!!!!!!!!!!!!!!!!"
 
 cartas_maquina: .space 28
 sinais_cartas_maquina: .space 28
@@ -378,17 +379,6 @@ movl    $cartas_sortiadas, %edi
 movl    (%edi), %eax
 addl    $4, %edi
 _loop_verifica_carta:
-pushl   %ecx
-pushl   %edi
-pushl   %eax
-pushl   (%edi)
-pushl   %eax
-pushl   $print_comparando
-call    printf
-addl    $12, %esp
-popl    %eax
-popl    %edi
-popl    %ecx
 movl    (%edi), %ebx
 cmpl    %eax, %ebx
 je      _verifica_sinal
@@ -427,11 +417,12 @@ subl    %eax, %edi
 addl    $32, %edi
 subl    %ebx, %edi
 pushl   (%edi)
-pushl   $print_iguais
-call    printf
-jmp     finalizar_programa
+popl    %eax
+popl    %ebx
+cmpl    %eax, %ebx
+je      _bem_vindo
+addl    $24, %esp
 ret
-#####
 
 .globl _start
 _start:
@@ -469,6 +460,8 @@ call _verifica_carta
 
 finalizar_programa:
 pushl   $quebra_linha
+call    printf
+pushl   $print_gerou_certo
 call    printf
 pushl   $0
 call    exit
