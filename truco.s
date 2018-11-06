@@ -20,7 +20,7 @@ contador: .int 0
 print_iguais: .asciz "Estas cartas são iguais! %d e %d"
 print_diferentes: .asciz "Estas cartas são diferentes!"
 print_comparando: .asciz "Comparando %d e %d\n"
-print_gerou_certo: .asciz "deu certo caraio!!!!!!!!!!!!!!!!"
+print_gerou_certo: .asciz "deu certo caraio!!!!!!!!!!!!!!!!\n"
 
 cartas_maquina: .space 28
 sinais_cartas_maquina: .space 28
@@ -420,8 +420,8 @@ pushl   (%edi)
 popl    %eax
 popl    %ebx
 cmpl    %eax, %ebx
-je      _bem_vindo
-addl    $24, %esp
+je      _sortiando_as_cartas
+addl    $4, %esp
 ret
 
 .globl _start
@@ -433,6 +433,8 @@ call    printf
 addl    $4, %esp #limpa a pilha
 
 call _gerador_semente_aleatoria
+
+_sortiando_as_cartas:
 
 call _gerador_cartas_maquina
 
@@ -446,6 +448,8 @@ call _gera_vira
 
 call _gera_sinal_vira
 
+call _verifica_carta
+
 call _imprime_cartas_maquina
 
 call _imprime_cartas_jogador
@@ -455,8 +459,6 @@ call _imprime_cartas_sortiadas
 call _imprime_sinais_cartas_sortiadas
 
 call _imprime_vira
-
-call _verifica_carta
 
 finalizar_programa:
 pushl   $quebra_linha
