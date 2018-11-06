@@ -22,10 +22,19 @@ print_diferentes: .asciz "Estas cartas são diferentes!"
 print_comparando: .asciz "Comparando %d e %d\n"
 print_gerou_certo: .asciz "deu certo caraio!!!!!!!!!!!!!!!!"
 
+print_jogador_ganhou: .asciz "O jogador ganhou!"
+print_computador_ganhou: .asciz "O computador ganhou!"
+
+
+print_acao_mao1: .asciz "Escolha uma carta de 1 a 3 ou 4 para truco"
+
+
 cartas_maquina: .space 28
 sinais_cartas_maquina: .space 28
 cartas_jogador: .space 28
 sinais_cartas_jogador: .space 28
+
+pontos: .space 16
 
 cartas: .asciz "4     ", "5     ", "6     ", "7     ", "Dama  ", "Valete", "Reis  ", "As    ", "2     ", "3     "
 sinais: .asciz "Ouros ", "Espada", "Copas ", "Paus  "
@@ -424,6 +433,47 @@ je      _bem_vindo
 addl    $24, %esp
 ret
 
+_verifica_tem_vencedor:
+    movl $12, %eax
+
+    movl $pontos, %edi 
+
+    #Primeira celula é o ponto da mao
+    #Segunda celula sãos o ponto do jogador
+    #Terceira celula sãos o ponto do computador
+    addl $4, %edi
+    movl (%edi), %ebx
+    cmpl %eax, %ebx
+    jnb _jogador_ganhou
+
+    addl $4, %edi
+    movl (%edi), %ebx
+    cmpl %eax, %ebx
+    jnb _computador_ganhou
+    ret
+
+_jogador_ganhou:
+    pushl   $print_jogador_ganhou
+    call    printf
+    addl    $4, %esp #limpa a pilha
+    jmp     finalizar_programa
+
+_computador_ganhou:
+    pushl   $print_computador_ganhou
+    call    printf
+    addl    $4, %esp #limpa a pilha
+    jmp     finalizar_programa
+
+_inicia_mao:
+    movl $pontos, %edi 
+    movl $1, (%edi)
+    ret
+
+_imprime_acao_mao1:
+    pushl $print_acao_mao1
+    call printf
+    ret
+
 .globl _start
 _start:
 
@@ -456,7 +506,13 @@ call _imprime_sinais_cartas_sortiadas
 
 call _imprime_vira
 
-call _verifica_carta
+#call _verifica_carta
+
+call _verifica_tem_vencedor
+
+call _inicia_mao
+
+call _imprime_acao_mao1
 
 finalizar_programa:
 pushl   $quebra_linha
