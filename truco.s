@@ -1,4 +1,4 @@
-    .section .data
+.section .data
     msg_bem_vindo: .asciz "=============================================================\n|                    Bem vindo ao Truco 1.0                 |\n ===========================================================\n"
     pergunta_inicial: .asciz "Você deseja [i]niciar o Jogo ou [s]air?\n"
     msg_cartas: .asciz "Suas cartas são: \n"
@@ -14,6 +14,12 @@
     print_vira: .asciz "A vira eh: "
     print_cartas_sortiadas: .asciz "As cartas sortiadas foram:  "
     print_sinais_sortiados: .asciz "Os sinais sortiados foram:  "
+    ##michel##
+    print_nao_escolheu_nada: .asciz "Não escolheu nenhuma opção "
+    print_escolheu_opcao_um: .asciz "Escolheu a opção um"
+    print_escolheu_opcao_dois: .asciz "Escolheu opção dois"
+    print_escolheu_opcao_tres: .asciz "Escolheu opção tres"
+    ##michel##
     teste: .asciz "cheguei aqui"
     quebra_linha: .asciz "\n"
     print_cartas_iguais: .asciz "As cartas informadas são iguais: %s, %s \n"
@@ -35,12 +41,14 @@
     
     print_acao_mao1: .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
     print_acao_mao11: .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
-    print_escolhe_cartas: .asciz "Escolha uma das cartas abaixo:"
-    print_escolhe_carta_um: .asciz "Carta 1: %s %s"
-    print_escolhe_carta_dois: .asciz "Carta 2: %s %s"
-    print_escolhe_carta_tres: .asciz "Carta 3: %s %s"
+    print_escolhe_cartas: .asciz "Escolha uma das cartas abaixo:\n"
+    print_escolhe_carta_um: .asciz "Carta [1]: %s %s"
+    print_escolhe_carta_dois: .asciz "Carta [2]: %s %s"
+    print_escolhe_carta_tres: .asciz "Carta [3]: %s %s"
     
-    pontos: .space 16
+    pontos_mao: .int 0
+    pontos_jogador: .int 0
+    pontos_computador: .int 0
 
     cartas: .asciz "4     ", "5     ", "6     ", "7     ", "Dama  ", "Valete", "Reis  ", "As    ", "2     ", "3     "
     sinais: .asciz "Ouros ", "Espada", "Copas ", "Paus  "
@@ -445,21 +453,13 @@
 
 _verifica_tem_vencedor:
     movl $12, %eax
-
-    movl $pontos, %edi
-
-    #Primeira celula é o ponto da mao
-    #Segunda celula sãos o ponto do jogador
-    #Terceira celula sãos o ponto do computador
-    addl $4, %edi
-    movl (%edi), %ebx
+    movl pontos_jogador, %ebx
     cmpl %eax, %ebx
-    jnb _jogador_ganhou
+    jge _jogador_ganhou
 
-    addl $4, %edi
-    movl (%edi), %ebx
+    movl pontos_computador, %ebx
     cmpl %eax, %ebx
-    jnb _computador_ganhou
+    jge _computador_ganhou
     ret
 
 _jogador_ganhou:
@@ -475,25 +475,53 @@ _computador_ganhou:
     jmp     finalizar_programa
 
 _inicia_mao:
-    movl $pontos, %edi
-    movl $1, (%edi)
+    _sortiando_as_cartas:
+
+    call _gerador_cartas_jogador
+
+    call _gerador_sinais_cartas_jogador
+    
+    call _gerador_cartas_maquina
+
+    call _gerador_sinais_cartas_maquina
+
+    call _gera_vira
+
+    call _gera_sinal_vira
+
+    call _verifica_carta
+
+    call _imprime_cartas_maquina
+
+    call _imprime_cartas_jogador
+
+    call _imprime_cartas_sortiadas
+
+    call _imprime_sinais_cartas_sortiadas
+
+    call _imprime_vira
+
+    call _verifica_tem_vencedor
+
+    movl $1, pontos_mao 
     ret
 
 _imprime_acao_mao1:
     pushl $print_acao_mao1
     call printf
-
     pushl $rgeral
-    pushl $print_numero
+    pushl $formato_numero
     call scanf
+    addl    $12, %esp
     movl    $rgeral, %eax
-    cmpl    $1, %eax
+    cmpl    $1, (%eax)
     je      _menu_cartas
-    addl    $12, %esp #limpa a pilha
-
-    movl $rgeral, %eax
-
+    cmpl    $2, (%eax)
+    je      _menu_cartas
+    cmpl    $3, (%eax)
+    je      _menu_cartas
     ret
+    
     _menu_cartas:
     pushl   $print_escolhe_cartas
     call    printf
@@ -502,8 +530,15 @@ _imprime_acao_mao1:
     cmpl   $-1, (%edi)
     jne     _menu_cartas_print_carta_um
     addl    $4, %edi
-    cmpl   $-1, (%edi)
+    pushl   %edi
+    pushl   (%edi)
+    pushl   $print_numero
+    call    printf
+    addl    $8, %esp
+    popl    %edi
+    cmpl    $-1, (%edi)
     jne     _menu_cartas_print_carta_dois
+    addl    $8, %edi
     cmpl   $-1, (%edi)
     jne     _menu_cartas_print_carta_tres
     ret
@@ -560,34 +595,6 @@ _imprime_acao_mao1:
 
     call _gerador_semente_aleatoria
 
-    _sortiando_as_cartas:
-
-    call _gerador_cartas_jogador
-
-    call _gerador_sinais_cartas_jogador
-    
-    call _gerador_cartas_maquina
-
-    call _gerador_sinais_cartas_maquina
-
-    call _gera_vira
-
-    call _gera_sinal_vira
-
-    call _verifica_carta
-
-    call _imprime_cartas_maquina
-
-    call _imprime_cartas_jogador
-
-    call _imprime_cartas_sortiadas
-
-    call _imprime_sinais_cartas_sortiadas
-
-    call _imprime_vira
-
-    call _verifica_tem_vencedor
-
     call _inicia_mao
 
     call _imprime_acao_mao1
@@ -599,5 +606,3 @@ _imprime_acao_mao1:
     call    printf
     pushl   $0
     call    exit
-
-
