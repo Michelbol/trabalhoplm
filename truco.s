@@ -14,12 +14,10 @@
     print_vira: .asciz "A vira eh: "
     print_cartas_sortiadas: .asciz "As cartas sortiadas foram:  "
     print_sinais_sortiados: .asciz "Os sinais sortiados foram:  "
-    ##michel##
     print_nao_escolheu_nada: .asciz "Não escolheu nenhuma opção "
     print_escolheu_opcao_um: .asciz "Escolheu a opção um"
     print_escolheu_opcao_dois: .asciz "Escolheu opção dois"
     print_escolheu_opcao_tres: .asciz "Escolheu opção tres"
-    ##michel##
     teste: .asciz "cheguei aqui"
     quebra_linha: .asciz "\n"
     print_cartas_iguais: .asciz "As cartas informadas são iguais: %s, %s \n"
@@ -42,8 +40,8 @@
     print_acao_mao1: .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
     print_acao_mao11: .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
     print_escolhe_cartas: .asciz "Escolha uma das cartas abaixo:\n"
-    print_escolhe_carta_um: .asciz "Carta [1]: %s %s"
-    print_escolhe_carta_dois: .asciz "Carta [2]: %s %s"
+    print_escolhe_carta_um: .asciz "Carta [1]: %s %s\n"
+    print_escolhe_carta_dois: .asciz "Carta [2]: %s %s\n"
     print_escolhe_carta_tres: .asciz "Carta [3]: %s %s"
     
     pontos_mao: .int 0
@@ -491,13 +489,13 @@ _inicia_mao:
 
     call _verifica_carta
 
-    call _imprime_cartas_maquina
+    #call _imprime_cartas_maquina
 
     call _imprime_cartas_jogador
 
-    call _imprime_cartas_sortiadas
+    #call _imprime_cartas_sortiadas
 
-    call _imprime_sinais_cartas_sortiadas
+    #call _imprime_sinais_cartas_sortiadas
 
     call _imprime_vira
 
@@ -528,52 +526,51 @@ _imprime_acao_mao1:
     addl    $4, %esp
     movl    $cartas_sortiadas, %edi
     cmpl   $-1, (%edi)
-    jne     _menu_cartas_print_carta_um
+    jne    _menu_cartas_print_carta_um
+    _carta_dois:
     addl    $4, %edi
-    pushl   %edi
-    pushl   (%edi)
-    pushl   $print_numero
-    call    printf
-    addl    $8, %esp
-    popl    %edi
     cmpl    $-1, (%edi)
     jne     _menu_cartas_print_carta_dois
-    addl    $8, %edi
+    _carta_tres:
+    addl    $4, %edi
     cmpl   $-1, (%edi)
     jne     _menu_cartas_print_carta_tres
+    _menu_cartas_retorno:
     ret
     
     _menu_cartas_print_carta_um:
-    movl    $cartas_jogador, %eax
-    pushl   (%eax)
     movl    $sinais_cartas_jogador, %eax
+    pushl   (%eax)
+    movl    $cartas_jogador, %eax
     pushl   (%eax)
     pushl   $print_escolhe_carta_um
     call    printf
     addl    $12, %esp
-    ret
+    jmp     _carta_dois
     
     _menu_cartas_print_carta_dois:
-    movl    $cartas_jogador, %eax
-    addl    $4, %eax
-    pushl   (%eax)
     movl    $sinais_cartas_jogador, %eax
-    addl    $4, %eax
+    addl    $7, %eax
+    pushl   (%eax)
+    movl    $cartas_jogador, %eax
+    addl    $7, %eax
     pushl   (%eax)
     pushl   $print_escolhe_carta_dois
     call    printf
-    ret
+    addl    $12, %esp
+    jmp     _carta_tres
     
     _menu_cartas_print_carta_tres:
-    movl    $cartas_jogador, %eax
-    addl    $8, %eax
-    pushl   (%eax)
     movl    $sinais_cartas_jogador, %eax
-    addl    $8, %eax
+    addl    $14, %eax
+    pushl   (%eax)
+    movl    $cartas_jogador, %eax
+    addl    $14, %eax
     pushl   (%eax)
     pushl   $print_escolhe_carta_tres
     call    printf
-    ret
+    addl    $12, %esp
+    jmp     _menu_cartas_retorno
     
 .globl _start
     _start:
