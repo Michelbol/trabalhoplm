@@ -22,6 +22,8 @@
     quebra_linha: .asciz "\n"
     print_cartas_iguais: .asciz "As cartas informadas são iguais: %s, %s \n"
     contador: .int 0
+    jogador_jogou_carta: .asciz "Você jogou a carta %s de %s\n"
+    maquina_jogou_carta: .asciz "A máquina jogou a carta %s de %s\n"
     print_iguais: .asciz "Estas cartas são iguais! %d e %d"
     print_diferentes: .asciz "Estas cartas são diferentes!"
     print_comparando: .asciz "Comparando %d e %d\n"
@@ -33,17 +35,17 @@
     sinais_cartas_maquina: .space 28
     cartas_jogador: .space 28
     sinais_cartas_jogador: .space 28
-    
+
     print_jogador_ganhou: .asciz "O jogador ganhou!"
     print_computador_ganhou: .asciz "O computador ganhou!"
-    
+
     print_acao_mao1: .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
     print_acao_mao11: .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
     print_escolhe_cartas: .asciz "Escolha uma das cartas abaixo:\n"
     print_escolhe_carta_um: .asciz "Carta [1]: %s %s\n"
     print_escolhe_carta_dois: .asciz "Carta [2]: %s %s\n"
     print_escolhe_carta_tres: .asciz "Carta [3]: %s %s"
-    
+
     pontos_mao: .int 0
     pontos_jogador: .int 0
     pontos_computador: .int 0
@@ -478,7 +480,7 @@ _inicia_mao:
     call _gerador_cartas_jogador
 
     call _gerador_sinais_cartas_jogador
-    
+
     call _gerador_cartas_maquina
 
     call _gerador_sinais_cartas_maquina
@@ -501,7 +503,7 @@ _inicia_mao:
 
     call _verifica_tem_vencedor
 
-    movl $1, pontos_mao 
+    movl $1, pontos_mao
     ret
 
 _imprime_acao_mao1:
@@ -519,7 +521,7 @@ _imprime_acao_mao1:
     cmpl    $3, (%eax)
     je      _menu_cartas
     ret
-    
+
     _menu_cartas:
     pushl   $print_escolhe_cartas
     call    printf
@@ -536,8 +538,51 @@ _imprime_acao_mao1:
     cmpl   $-1, (%edi)
     jne     _menu_cartas_print_carta_tres
     _menu_cartas_retorno:
+    pushl   $quebra_linha
+    call    printf
+    pushl   $rgeral
+    pushl   $formato_numero
+    call    scanf
+    addl    $12, %esp
+    call    _printa_carta_jogada_jogador
+    call    _computador_escolhe_carta
+    call    _printa_carta_jogada_maquina
     ret
-    
+
+    #printa a carta jogada do jogador, a carta deve ser uma das opções do menu(1,2,3) e deve ser armazenada em rgeral
+    _printa_carta_jogada_jogador:
+    movl    $rgeral, %eax
+    movl    (%eax), %eax
+    movl    $1,  %edx
+    subl    %edx, %eax
+    movl    $0, %edx                    #limpando edx
+    movl    $7, %ebx                    #multiplico por 7 pois é o número de caracteres nos vetores
+    mull    %ebx
+    movl    $sinais_cartas_jogador, %edi
+    addl    %eax, %edi
+    pushl   (%edi)
+    movl    $cartas_jogador, %edi
+    addl    %eax, %edi
+    pushl   (%edi)
+    pushl   $jogador_jogou_carta
+    call    printf
+    addl    $12, %esp
+    ret
+
+    #printa a carta jogada da maquina, a carta deve ser radomica e um indice do vetor e deve ser armazenada em %edi
+    _printa_carta_jogada_maquina:
+    movl    %edi, %eax
+    movl    $sinais_cartas_maquina, %edi
+    addl    %eax, %edi
+    pushl   (%edi)
+    movl    $cartas_maquina, %edi
+    addl    %eax, %edi
+    pushl   (%edi)
+    pushl   $maquina_jogou_carta
+    call    printf
+    addl    $12, %esp
+    ret
+
     _menu_cartas_print_carta_um:
     movl    $sinais_cartas_jogador, %eax
     pushl   (%eax)
@@ -547,7 +592,7 @@ _imprime_acao_mao1:
     call    printf
     addl    $12, %esp
     jmp     _carta_dois
-    
+
     _menu_cartas_print_carta_dois:
     movl    $sinais_cartas_jogador, %eax
     addl    $7, %eax
@@ -559,7 +604,7 @@ _imprime_acao_mao1:
     call    printf
     addl    $12, %esp
     jmp     _carta_tres
-    
+
     _menu_cartas_print_carta_tres:
     movl    $sinais_cartas_jogador, %eax
     addl    $14, %eax
@@ -571,7 +616,56 @@ _imprime_acao_mao1:
     call    printf
     addl    $12, %esp
     jmp     _menu_cartas_retorno
-    
+
+    #gera um número randomico e joga uma carta do computador
+    _computador_escolhe_carta:
+    call    rand                        #gera numero randomico
+    movl    $0, %edx                    #limpando edx
+    movl    $3, %ebx                    #iremos pegar apenas numeros entre 0 e 2 assim teremos que dividir por 2
+    divl    %ebx
+    cmpl    $0,%edx
+    je      _jogar_carta_um_computador
+    cmpl    $1, %edx
+    je      _jogar_carta_dois_computador
+    cmpl    $2, %edx
+    je      _jogar_carta_tres_computador
+    ret
+
+    #função irá setar -1 para posição da carta selecionada e deixar a carta em %edi
+    _jogar_carta_um_computador:
+    movl    $cartas_sortiadas, %eax
+    movl    (%eax), %ebx
+    movl    %ebx, %edi
+    subl    %ebx, %ebx
+    movl    $-1,  %edx
+    subl    %ebx, %edx
+    movl    %ebx, (%eax)
+    ret
+
+    #função irá setar -1 para posição da carta selecionada e deixar a carta em %edi
+    _jogar_carta_dois_computador:
+    movl    $cartas_sortiadas, %eax
+    addl    $4, %eax
+    movl    (%eax), %ebx
+    movl    %ebx, %edi
+    subl    %ebx, %ebx
+    movl    $-1,  %edx
+    subl    %ebx, %edx
+    movl    %ebx, (%eax)
+    ret
+
+    #função irá setar -1 para posição da carta selecionada e deixar a carta em %edi
+    _jogar_carta_tres_computador:
+    movl    $cartas_sortiadas, %eax
+    addl    $8, %eax
+    movl    (%eax), %ebx
+    movl    %ebx, %edi
+    subl    %ebx, %ebx
+    movl    $-1,  %edx
+    subl    %ebx, %edx
+    movl    %ebx, (%eax)
+    ret
+
 .globl _start
     _start:
 
