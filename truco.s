@@ -46,6 +46,19 @@
     print_escolhe_carta_dois: .asciz "Carta [2]: %s %s\n"
     print_escolhe_carta_tres: .asciz "Carta [3]: %s %s"
 
+    print_jogador_ganhou_mao: .asciz "O jogador ganhou a mao!!\n"
+    print_computador_ganhou_mao: .asciz "O computador ganhou a mao!!\n"
+    print_jogador_ganhou_tento: .asciz "O jogador ganhou o tento!\n"
+    print_computador_ganhou_tento: .asciz "O computador ganhou o tento!\n"
+
+    print_computador_pediu_seis: .asciz "O computador pediu seis!\n[1] Pedir Nove\n[2] Correr\n"
+
+    print_computador_aceitou: .asciz "O computador aceitou o pedido!\n"
+
+    print_pontos: .asciz "\nPONTOS:\nJOGADOR: %d\nCOMPUTADOR: %d\n\n\n\n"
+
+    print_escolhe_cartas_esconde: .asciz "Escolha uma das cartas abaixo para jogar escondido:\n" #joao
+
     pontos_mao: .int 0
     pontos_jogador: .int 0
     pontos_computador: .int 0
@@ -68,7 +81,7 @@
     formato_string: .asciz "%*c"
     formato_numero: .asciz "%d"
     resposta_inicial: .asciz "%s"
-
+#=============================================================fim váriaveis===============================================================
 
     _gerador_semente_aleatoria:
     pushl   $tempo
@@ -517,9 +530,9 @@ _imprime_acao_mao1:
     cmpl    $1, (%eax)
     je      _menu_cartas
     cmpl    $2, (%eax)
-    je      _menu_cartas
+    je      _menu_esconde_cartas
     cmpl    $3, (%eax)
-    je      _menu_cartas
+    je      _menu_pede_truco_jogador
     ret
 
     _menu_cartas:
@@ -572,10 +585,10 @@ _imprime_acao_mao1:
     #printa a carta jogada da maquina, a carta deve ser radomica e um indice do vetor e deve ser armazenada em %edi
     _printa_carta_jogada_maquina:
     movl    %edi, %eax
-    movl    $sinais_cartas_maquina, %edi
+    movl    $cartas_maquina, %edi
     addl    %eax, %edi
     pushl   (%edi)
-    movl    $cartas_maquina, %edi
+    movl    $sinais_cartas_maquina, %edi
     addl    %eax, %edi
     pushl   (%edi)
     pushl   $maquina_jogou_carta
@@ -630,6 +643,127 @@ _imprime_acao_mao1:
     cmpl    $2, %edx
     je      _jogar_carta_tres_computador
     ret
+
+    _menu_esconde_cartas:
+    pushl   $print_escolhe_cartas_esconde
+    call    printf
+    addl    $4, %esp
+    movl    $cartas_sortiadas, %edi
+    cmpl    $-1, (%edi)
+    jne     _menu_esconde_cartas_print_carta_um
+    _esconde_carta_dois:
+    addl    $4, %edi
+    cmpl    $-1, (%edi)
+    jne     _menu_esconde_cartas_print_carta_dois
+    _esconde_carta_tres:
+    addl    $4, %edi
+    cmpl    $-1, (%edi)
+    jne     _menu_esconde_cartas_print_carta_tres
+    _menu_esconde_cartas_retorno:
+    ret
+
+    _menu_esconde_cartas_print_carta_um:
+    movl    $sinais_cartas_jogador, %eax
+    pushl   (%eax)
+    movl    $cartas_jogador, %eax
+    pushl   (%eax)
+    pushl   $print_escolhe_carta_um
+    call    printf
+    addl    $12, %esp
+    jmp     _esconde_carta_dois
+
+    _menu_esconde_cartas_print_carta_dois:
+    movl    $sinais_cartas_jogador, %eax
+    addl    $7, %eax
+    pushl   (%eax)
+    movl    $cartas_jogador, %eax
+    addl    $7, %eax
+    pushl   (%eax)
+    pushl   $print_escolhe_carta_dois
+    call    printf
+    addl    $12, %esp
+    jmp     _esconde_carta_tres
+
+    _menu_esconde_cartas_print_carta_tres:
+    movl    $sinais_cartas_jogador, %eax
+    addl    $14, %eax
+    pushl   (%eax)
+    movl    $cartas_jogador, %eax
+    addl    $14, %eax
+    pushl   (%eax)
+    pushl   $print_escolhe_carta_tres
+    call    printf
+    addl    $12, %esp
+    jmp     _menu_esconde_cartas_retorno
+
+    _menu_pede_truco_jogador:
+    #Aqui será calculado se o computador ira correr ou não
+    call    rand                        #gera numero randomico
+    pushl   %eax                        #eax contem o numero randomico
+    movl    $0, %edx                    #limpando edx
+    movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+    divl    %ebx
+    pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+    cmpl    $0, %edx                    #50%  de chance de ser 0
+    je      _computador_perdeu_mao
+    #Aqui será calculado se o computador ira pedir seis ou não
+    _menu_pede_seis_jogador:
+    addl    $2, pontos_mao
+    call    rand                        #gera numero randomico
+    pushl   %eax                        #eax contem o numero randomico
+    movl    $0, %edx                    #limpando edx
+    movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+    divl    %ebx
+    pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+    cmpl    $0, %edx                    #50%  de chance de ser 0
+    je      _menu_responde_seis_jogador
+    pushl   $print_computador_aceitou
+    call    printf
+    jmp     _menu_cartas
+
+    _menu_responde_seis_jogador:
+    pushl   $print_computador_pediu_seis
+    call    printf
+    pushl   $rgeral
+    pushl   $formato_numero
+    call    scanf
+    addl    $12, %esp
+    movl    $rgeral, %eax
+    cmpl    $1, (%eax)
+    je      _menu_pede_nove_jogador
+    cmpl    $2, (%eax)
+    je      _jogador_perdeu_mao
+    _menu_pede_nove_jogador:
+    jmp     finalizar_programa
+
+
+    _computador_perdeu_mao:
+    movl  pontos_mao, %eax
+    addl  %eax, pontos_jogador
+    pushl $print_jogador_ganhou_mao
+    call  printf
+    movl  $pontos_computador, %eax
+    movl  $pontos_jogador, %ebx
+    pushl (%eax)
+    pushl (%ebx)
+    pushl $print_pontos
+    call  printf
+    addl    $12, %esp
+    jmp   _inicia_mao
+
+    _jogador_perdeu_mao:
+    movl  pontos_mao, %eax
+    addl  %eax, pontos_computador
+    pushl $print_computador_ganhou_mao
+    call  printf
+    movl  $pontos_computador, %eax
+    movl  $pontos_jogador, %ebx
+    pushl (%eax)
+    pushl (%ebx)
+    pushl $print_pontos
+    call  printf
+    addl    $12, %esp
+    jmp   _inicia_mao
 
     #função irá setar -1 para posição da carta selecionada e deixar a carta em %edi
     _jogar_carta_um_computador:
