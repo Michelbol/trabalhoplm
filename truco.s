@@ -504,13 +504,13 @@ _inicia_mao:
 
     call _verifica_carta
 
-    #call _imprime_cartas_maquina
+    call _imprime_cartas_maquina
 
     call _imprime_cartas_jogador
 
-    #call _imprime_cartas_sortiadas
+    call _imprime_cartas_sortiadas
 
-    #call _imprime_sinais_cartas_sortiadas
+    call _imprime_sinais_cartas_sortiadas
 
     call _imprime_vira
 
@@ -558,8 +558,21 @@ _imprime_acao_mao1:
     call    scanf
     addl    $12, %esp
     call    _printa_carta_jogada_jogador
+    pushl   %eax
     call    _computador_escolhe_carta
+    pushl   %edi
     call    _printa_carta_jogada_maquina
+    popl    %eax
+    popl    %edi
+    pushl   %eax
+    pushl   $formato_numero
+    call    printf
+    pushl   $quebra_linha
+    call    printf
+    pushl   %edi
+    pushl   $formato_numero
+    call    printf
+    jmp     finalizar_programa
     ret
 
     #printa a carta jogada do jogador, a carta deve ser uma das opções do menu(1,2,3) e deve ser armazenada em rgeral
@@ -571,6 +584,7 @@ _imprime_acao_mao1:
     movl    $0, %edx                    #limpando edx
     movl    $7, %ebx                    #multiplico por 7 pois é o número de caracteres nos vetores
     mull    %ebx
+    pushl   %eax
     movl    $sinais_cartas_jogador, %edi
     addl    %eax, %edi
     pushl   (%edi)
@@ -580,15 +594,16 @@ _imprime_acao_mao1:
     pushl   $jogador_jogou_carta
     call    printf
     addl    $12, %esp
+    popl    %eax
     ret
 
     #printa a carta jogada da maquina, a carta deve ser radomica e um indice do vetor e deve ser armazenada em %edi
     _printa_carta_jogada_maquina:
     movl    %edi, %eax
-    movl    $cartas_maquina, %edi
+    movl    $sinais_cartas_maquina, %edi
     addl    %eax, %edi
     pushl   (%edi)
-    movl    $sinais_cartas_maquina, %edi
+    movl    $cartas_maquina, %edi
     addl    %eax, %edi
     pushl   (%edi)
     pushl   $maquina_jogou_carta
@@ -769,10 +784,10 @@ _imprime_acao_mao1:
     _jogar_carta_um_computador:
     movl    $cartas_sortiadas, %eax
     movl    (%eax), %ebx
-    movl    %ebx, %edi
+    movl    $0, %edi
     subl    %ebx, %ebx
     movl    $-1,  %edx
-    subl    %ebx, %edx
+    addl    %edx, %ebx
     movl    %ebx, (%eax)
     ret
 
@@ -781,10 +796,10 @@ _imprime_acao_mao1:
     movl    $cartas_sortiadas, %eax
     addl    $4, %eax
     movl    (%eax), %ebx
-    movl    %ebx, %edi
+    movl    $7, %edi
     subl    %ebx, %ebx
     movl    $-1,  %edx
-    subl    %ebx, %edx
+    addl    %edx, %ebx
     movl    %ebx, (%eax)
     ret
 
@@ -793,10 +808,10 @@ _imprime_acao_mao1:
     movl    $cartas_sortiadas, %eax
     addl    $8, %eax
     movl    (%eax), %ebx
-    movl    %ebx, %edi
+    movl    $14, %edi
     subl    %ebx, %ebx
     movl    $-1,  %edx
-    subl    %ebx, %edx
+    addl    %edx, %ebx
     movl    %ebx, (%eax)
     ret
 
@@ -806,14 +821,14 @@ _imprime_acao_mao1:
     _bem_vindo:
     pushl   $msg_bem_vindo
     call    printf
-    pushl   $pergunta_inicial
-    call    printf
-    call    getchar
-    addl    $8, %esp #limpa a pilha
-    cmpl    $'s', %eax
-    je finalizar_programa
-    cmpl    $'S', %eax
-    je finalizar_programa
+    #pushl   $pergunta_inicial
+    #call    printf
+    #call    getchar
+    #addl    $8, %esp #limpa a pilha
+    #cmpl    $'s', %eax
+    #je finalizar_programa
+    #cmpl    $'S', %eax
+    #je finalizar_programa
 
     pushl   $quebra_linha
     call    printf
