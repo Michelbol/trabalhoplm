@@ -14,10 +14,12 @@
         print_escolheu_opcao_um: .asciz "Escolheu a opção um"
         print_escolheu_opcao_dois: .asciz "Escolheu opção dois"
         print_escolheu_opcao_tres: .asciz "Escolheu opção tres"
-        print_carta_vencedora_sinal: .asciz "As cartas são iguais, verificando o sinal agora"
+        print_carta_vencedora_sinal: .asciz "As cartas são iguais, verificando o sinal agora\n"
         print_primeira_carta_vencedora: .asciz "A primeira carta ganhou!"
         print_segunda_carta_vencedora: .asciz "A segunda carta ganhou!"
         teste: .asciz "cheguei aqui"
+        cartas_corretas: .asciz "Todas as cartas estao corretas!"
+        contador_em: .asciz "Contador em: %d\n"
         quebra_linha: .asciz "\n"
         print_cartas_iguais: .asciz "As cartas informadas são iguais: %s, %s \n"
         contador: .int 0
@@ -435,6 +437,7 @@
         subl    %eax, %ecx
         popl    %eax
         jmp     _loop_verifica_carta
+
         _verifica_carta:
         movl    $6, %ecx
         movl    $cartas_sortiadas, %edi
@@ -442,22 +445,57 @@
         addl    $4, %edi
         _loop_verifica_carta:
         movl    (%edi), %ebx
+        pushl   %ecx
+        pushl   %ebx
+        pushl   %eax
+        pushl   $print_iguais
+        call    printf
+        addl    $4, %esp
+        pushl   $quebra_linha
+        call    printf
+        addl    $4, %esp
+        popl    %eax
+        popl    %ebx
+        popl    %ecx
         cmpl    %eax, %ebx
+        pushl   %eax
+        pushl   %ebx
+        pushl   %ecx
+        pushl   %edx
+        pushl   %edi
         je      _verifica_sinal
+        _sinal_verificado:
+        popl   %edi
+        popl   %edx
+        popl   %ecx
+        popl   %ebx
+        popl   %eax
         addl    $4, %edi
         loop    _loop_verifica_carta
         movl    contador, %eax
         movl    $5, %ebx
         cmpl    %eax, %ebx
         jne     _proximo_elemento_vetor
+        pushl   %eax
+        pushl   %ebx
+        pushl   %ecx
+        pushl   %edx
+        pushl   %edi
+        pushl   $cartas_corretas
+        call    printf
+        addl    $4, %esp
+        popl   %edi
+        popl   %edx
+        popl   %ecx
+        popl   %ebx
+        popl   %eax
         cmpl    %eax, %eax
         acabou:
-            ret
+        ret
 
         _verifica_sinal:
         movl    contador, %eax
         movl    %ecx, %edi
-        pushl   %edi
         pushl   %eax
         movl    %edi, %eax
         movl    $4, %ebx
@@ -481,10 +519,24 @@
         pushl   (%edi)
         popl    %eax
         popl    %ebx
+        pushl   %eax
+        pushl   %ebx
+        pushl   %ecx
+        pushl   %edx
+        pushl   %edi
+        pushl   %eax
+        pushl   %ebx
+        pushl   $print_comparando
+        call    printf
+        addl    $12, %esp
+        popl   %edi
+        popl   %edx
+        popl   %ecx
+        popl   %ebx
+        popl   %eax
         cmpl    %eax, %ebx
         je      _sortiando_as_cartas
-        addl    $4, %esp
-        ret
+        jmp     _sinal_verificado
 
     _verifica_tem_vencedor:
         movl $12, %eax
@@ -509,8 +561,14 @@
         addl    $4, %esp #limpa a pilha
         jmp     finalizar_programa
 
+    _reiniciar_variaveis:
+    movl    $0, contador
+    ret
+
     _inicia_mao:
         _sortiando_as_cartas:
+
+        call _reiniciar_variaveis
 
         call _gerador_cartas_jogador
 
@@ -524,21 +582,25 @@
 
         call _gera_sinal_vira
 
-        call _verifica_carta
-
-        call _imprime_cartas_maquina
-
-        call _imprime_cartas_jogador
-
         call _imprime_cartas_sortiadas
 
         call _imprime_sinais_cartas_sortiadas
 
-        call _imprime_vira
+        call _verifica_carta
 
-        call _verifica_tem_vencedor
+        #call _imprime_cartas_maquina
 
-        movl $1, pontos_mao
+        #call _imprime_cartas_jogador
+
+        #call _imprime_cartas_sortiadas
+
+        #call _imprime_sinais_cartas_sortiadas
+
+        #call _imprime_vira
+
+        #call _verifica_tem_vencedor
+
+        #movl $1, pontos_mao
         ret
 
     _imprime_acao_mao1:
@@ -884,8 +946,8 @@
         call _gerador_semente_aleatoria
 
         call _inicia_mao
-        
-        call _imprime_acao_mao1
+
+        #call _imprime_acao_mao1
 
         finalizar_programa:
         pushl   $quebra_linha
