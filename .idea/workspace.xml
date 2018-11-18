@@ -4,13 +4,12 @@
     <bookmark url="file://$PROJECT_DIR$/truco" line="56" mnemonic="4" />
     <bookmark url="file://$PROJECT_DIR$/truco" line="17" mnemonic="5" />
     <bookmark url="file://$PROJECT_DIR$/truco.s" line="498" mnemonic="3" />
-    <bookmark url="file://$PROJECT_DIR$/truco.s" line="549" mnemonic="2" />
+    <bookmark url="file://$PROJECT_DIR$/truco.s" line="545" mnemonic="2" />
     <bookmark url="file://$PROJECT_DIR$/truco.s" line="448" mnemonic="1" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dc036b52-8487-47cd-aa47-9f62a2f217e0" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/truco.s" afterPath="$PROJECT_DIR$/truco.s" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="untitled.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,8 +34,8 @@
       <file leaf-file-name="truco.s" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/truco.s">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.38235295">
-              <caret line="904" column="22" selection-start-line="0" selection-start-column="0" selection-end-line="919" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.8910035">
+              <caret line="559" column="8" selection-start-line="0" selection-start-column="0" selection-end-line="915" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -294,8 +293,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/truco.s">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.38235295">
-          <caret line="904" column="22" selection-start-line="0" selection-start-column="0" selection-end-line="919" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.8910035">
+          <caret line="559" column="8" selection-start-line="0" selection-start-column="0" selection-end-line="915" selection-end-column="0" />
           <folding />
         </state>
       </provider>

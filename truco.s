@@ -543,25 +543,21 @@
 
         call _gera_sinal_vira
 
-        call _imprime_cartas_sortiadas
-
-        call _imprime_sinais_cartas_sortiadas
-
         call _verifica_carta
 
-        #call _imprime_cartas_maquina
+        call _imprime_cartas_maquina
 
-        #call _imprime_cartas_jogador
+        call _imprime_cartas_jogador
 
         #call _imprime_cartas_sortiadas
 
         #call _imprime_sinais_cartas_sortiadas
 
-        #call _imprime_vira
+        call _imprime_vira
 
-        #call _verifica_tem_vencedor
+        call _verifica_tem_vencedor
 
-        #movl $1, pontos_mao
+        movl $1, pontos_mao
         ret
 
     _imprime_acao_mao1:
@@ -908,7 +904,7 @@
 
         call _inicia_mao
 
-        #call _imprime_acao_mao1
+        call _imprime_acao_mao1
 
         finalizar_programa:
         pushl   $quebra_linha
