@@ -445,18 +445,6 @@
         addl    $4, %edi
         _loop_verifica_carta:
         movl    (%edi), %ebx
-        pushl   %ecx
-        pushl   %ebx
-        pushl   %eax
-        pushl   $print_iguais
-        call    printf
-        addl    $4, %esp
-        pushl   $quebra_linha
-        call    printf
-        addl    $4, %esp
-        popl    %eax
-        popl    %ebx
-        popl    %ecx
         cmpl    %eax, %ebx
         pushl   %eax
         pushl   %ebx
@@ -476,19 +464,6 @@
         movl    $5, %ebx
         cmpl    %eax, %ebx
         jne     _proximo_elemento_vetor
-        pushl   %eax
-        pushl   %ebx
-        pushl   %ecx
-        pushl   %edx
-        pushl   %edi
-        pushl   $cartas_corretas
-        call    printf
-        addl    $4, %esp
-        popl   %edi
-        popl   %edx
-        popl   %ecx
-        popl   %ebx
-        popl   %eax
         cmpl    %eax, %eax
         acabou:
         ret
@@ -519,24 +494,10 @@
         pushl   (%edi)
         popl    %eax
         popl    %ebx
-        pushl   %eax
-        pushl   %ebx
-        pushl   %ecx
-        pushl   %edx
-        pushl   %edi
-        pushl   %eax
-        pushl   %ebx
-        pushl   $print_comparando
-        call    printf
-        addl    $12, %esp
-        popl   %edi
-        popl   %edx
-        popl   %ecx
-        popl   %ebx
-        popl   %eax
         cmpl    %eax, %ebx
-        je      _sortiando_as_cartas
-        jmp     _sinal_verificado
+        jne     _sinal_verificado
+        addl    $24, %esp
+        jmp      _sortiando_as_cartas
 
     _verifica_tem_vencedor:
         movl $12, %eax
