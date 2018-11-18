@@ -47,6 +47,16 @@
         cartas:                         .asciz "4     ", "5     ", "6     ", "7     ", "Dama  ", "Valete", "Reis  ", "As    ", "2     ", "3     "
         sinais:                         .asciz "Ouros ", "Espada", "Copas ", "Paus  "
         pause_enter:                    .asciz "====================================Pressione <Enter>===================================="
+        rodada_aleatoria:               .asciz "Primeira jogada! Jogada Aleatoria!\n"
+        rodada_maior:                   .asciz "Ira verifica as cartas e jogar a maior q ainda nao foi jogada.\n"
+        carta_um_valida:                .asciz "Carta um valida!\n"
+        carta_dois_valida:              .asciz "Carta dois valida!\n"
+        carta_dois_valida_carta_um_tb:  .asciz "Carta um e dois validas\n"
+        carta_dois_valida_carta_tres_tb:.asciz "Carta dois e tres validas\n"
+        carta_tres_valida_carta_um_tb:  .asciz "Carta um e tres validas\n"
+        carta_dois_um_valid_ver_sinal:  .asciz "Carta um e dois validas, verificando sinal\n"
+        carta_tres_um_valid_ver_sinal:  .asciz "Carta um e tres validas, verificando sinal\n"
+        carta_tres_dois_valid_ver_sinal:.asciz "Carta dois e tres validas, verificando sinal\n"
         tempo:              .int 4
         contador:           .int 0
         rgeral:             .int 0
@@ -549,13 +559,13 @@
 
         call _verifica_carta
 
-        call _imprime_cartas_maquina
+        #call _imprime_cartas_maquina
 
         call _imprime_cartas_jogador
 
-        call _imprime_cartas_sortiadas
+        #call _imprime_cartas_sortiadas
 
-        call _imprime_sinais_cartas_sortiadas
+        #call _imprime_sinais_cartas_sortiadas
 
         call _imprime_vira
 
@@ -570,6 +580,11 @@
     _imprime_acao_mao:
         addl    $1, rodada
         movl    $1, pontos_mao
+        movl    rodada, %edi
+        pushl   %edi
+        pushl   $print_rodada
+        call    printf
+        addl    $8, %esp
         call    _verifica_rodada_acabou
         cmpl    $1, %eax
         je      _inicia_mao
@@ -706,6 +721,11 @@
 
         #gera um número randomico e joga uma carta do computador. Retorna o indice em cartas_sortiadas em %edi
         _computador_escolhe_carta:
+        movl    rodada, %ebx
+        cmpl    $1, %ebx
+        je      _rodada_aleatoria
+        jmp     _escolhe_maior_carta
+        _rodada_aleatoria:
         call    rand                        #gera numero randomico
         movl    $0, %edx                    #limpando edx
         movl    $3, %ebx                    #iremos pegar apenas numeros entre 0 e 2 assim teremos que dividir por 2
@@ -728,6 +748,112 @@
         movl    %eax, %edi
         popl    %eax
         ret
+        _escolhe_maior_carta:
+        movl    $status_cartas, %edi
+        addl    $12, %edi
+        pushl   %edi
+        cmpl    $0, (%edi)
+        je      _verificar_carta_um
+        popl    %edi
+        addl    $4, %edi
+        cmpl    $0, (%edi)
+        je      _verificar_carta_dois
+        pushl   $2
+        jmp     _jogar_carta_tres_computador
+        _verificar_carta_um:
+        addl    $4, %esp
+        addl    $4, %edi
+        cmpl    $0, (%edi)
+        je      _carta_dois_valida
+        addl    $4, %edi
+        cmpl    $0, (%edi)
+        je      _carta_tres_valida
+        pushl   $0
+        jmp     _jogar_carta_um_computador
+        _carta_dois_valida:
+        movl    $cartas_sortiadas, %edi
+        addl    $12, %edi
+        pushl   (%edi)
+        addl    $4, %edi
+        popl    %eax
+        cmpl    %eax, (%edi)
+        je      _jogar_carta_sinal_maior_um
+        pushl   $0
+        jl      _jogar_carta_um_computador
+        addl    $4, %esp
+        pushl   $1
+        jmp     _jogar_carta_dois_computador
+        _jogar_carta_sinal_maior_um:
+        movl    $sinais_sortiados, %edi
+        addl    $12, %edi
+        pushl   (%edi)
+        addl    $4, %edi
+        popl    %eax
+        cmpl    %eax, (%edi)
+        pushl   $0
+        jl      _jogar_carta_um_computador
+        addl    $4, %esp
+        pushl   $1
+        jmp     _jogar_carta_dois_computador
+        _carta_tres_valida:
+        movl    $cartas_sortiadas, %edi
+        addl    $12, %edi
+        pushl   (%edi)
+        addl    $8, %edi
+        popl    %eax
+        cmpl    %eax, (%edi)
+        je      _jogar_carta_sinal_maior_dois
+        pushl   $0
+        jl      _jogar_carta_um_computador
+        addl    $4, %esp
+        pushl   $2
+        jmp     _jogar_carta_tres_computador
+        _jogar_carta_sinal_maior_dois:
+        movl    $sinais_sortiados, %edi
+        addl    $12, %edi
+        pushl   (%edi)
+        addl    $8, %edi
+        popl    %eax
+        cmpl    %eax, (%edi)
+        pushl   $0
+        jl      _jogar_carta_um_computador
+        addl    $4, %esp
+        pushl   $1
+        jmp     _jogar_carta_dois_computador
+        _verificar_carta_dois:
+        addl    $4, %edi
+        cmpl    $0, (%edi)
+        je      _carta_tres_valida_dois
+        pushl   $1
+        jmp     _jogar_carta_dois_computador
+        _carta_tres_valida_dois:
+        pushl   $carta_dois_valida_carta_tres_tb
+        call    printf
+        addl    $4, %esp
+        movl    $cartas_sortiadas, %edi
+        addl    $16, %edi
+        pushl   (%edi)
+        addl    $4, %edi
+        popl    %eax
+        cmpl    %eax, (%edi)
+        je      _jogar_carta_sinal_maior_tres
+        pushl   $1
+        jl      _jogar_carta_dois_computador
+        addl    $4, %esp
+        pushl   $2
+        jmp     _jogar_carta_tres_computador
+        _jogar_carta_sinal_maior_tres:
+        movl    $sinais_sortiados, %edi
+        addl    $16, %edi
+        pushl   (%edi)
+        addl    $4, %edi
+        popl    %eax
+        cmpl    %eax, (%edi)
+        pushl   $1
+        jl      _jogar_carta_dois_computador
+        addl    $4, %esp
+        pushl   $2
+        jmp     _jogar_carta_tres_computador
 
         #verifica quais das duas cartas é a vencedora, cartas devem estar em %eax(Jogador) e %edi(Maquina), sendo elas o indice no vetor das cartas sortiadas
         _verifica_carta_vencedora:
@@ -905,11 +1031,6 @@
         jmp _carta_escolhida
 
         _imprime_pontos:
-        movl    rodada, %edi
-        pushl   %edi
-        pushl   $print_rodada
-        call    printf
-        addl    $8, %esp
         movl  $pontos_computador, %eax
         movl  $pontos_jogador, %ebx
         pushl (%eax)
@@ -920,7 +1041,6 @@
         ret
 
         _verifica_rodada_acabou:
-        call    _imprime_status_cartas
         movl    $status_cartas, %edi
         movl    $6, %ecx
         _verificando_rodada_acabou:
