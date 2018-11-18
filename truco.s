@@ -15,8 +15,8 @@
         print_escolheu_opcao_dois: .asciz "Escolheu opção dois"
         print_escolheu_opcao_tres: .asciz "Escolheu opção tres"
         print_carta_vencedora_sinal: .asciz "As cartas são iguais, verificando o sinal agora\n"
-        print_primeira_carta_vencedora: .asciz "A primeira carta ganhou!"
-        print_segunda_carta_vencedora: .asciz "A segunda carta ganhou!"
+        print_jogador_vencedor: .asciz "O jogador ganhou!"
+        print_maquina_vencedora: .asciz "A maquina ganhou!"
         teste: .asciz "cheguei aqui"
         cartas_corretas: .asciz "Todas as cartas estao corretas!"
         contador_em: .asciz "Contador em: %d\n"
@@ -97,6 +97,7 @@
         movl    $3, %ecx                    #numero de cartas que serão geradas devem estar em ecx(instrução loop)
         movl    $cartas_maquina, %ebx
         movl    $cartas_sortiadas, %edx
+        addl    $12, %edx
         _gera_carta_maquina:
         pushl   %edx
         pushl   %ecx                        #backup %ecx, %ebx e %edx que são o vetores
@@ -128,6 +129,7 @@
         movl    $3, %ecx                    #numero de sinais que serão geradas devem estar em ecx(instrução loop)
         movl    $sinais_cartas_maquina, %ebx
         movl    $sinais_sortiados, %edx
+        addl    $12, %edx
         _gera_sinal_carta_maquina:
         pushl   %edx
         pushl   %ecx                        #backup %ecx, %ebx e %edx que é o vetor
@@ -159,7 +161,6 @@
         movl    $3, %ecx                    #numero de cartas que serão geradas devem estar em ecx(instrução loop)
         movl    $cartas_jogador, %ebx
         movl    $cartas_sortiadas, %edx
-        addl    $12, %edx
         _gera_carta_jogador:
         pushl   %edx
         pushl   %ecx                        #backup %ecx e %ebx que é o vetor
@@ -245,7 +246,6 @@
         movl    $3, %ecx                    #numero de sinais que serão geradas devem estar em ecx(instrução loop)
         movl    $sinais_cartas_jogador, %ebx
         movl    $sinais_sortiados, %edx
-        addl    $12, %edx
         _gera_sinal_carta_jogador:
         pushl   %edx
         pushl   %ecx                        #backup %ecx e %ebx que é o vetor
@@ -549,18 +549,24 @@
 
         call _imprime_cartas_jogador
 
-        #call _imprime_cartas_sortiadas
+        call _imprime_cartas_sortiadas
 
-        #call _imprime_sinais_cartas_sortiadas
+        call _imprime_sinais_cartas_sortiadas
 
         call _imprime_vira
+
+        call _imprime_pontos
 
         call _verifica_tem_vencedor
 
         movl $1, pontos_mao
+
+        call _imprime_acao_mao
+
         ret
 
-    _imprime_acao_mao1:
+    _imprime_acao_mao:
+        call _verifica_rodada_acabou
         pushl $print_acao_mao1
         call printf
         pushl $rgeral
@@ -599,14 +605,17 @@
         call    scanf
         addl    $12, %esp
         call    _jogador_escolhe_carta
+        pushl   %eax
         call    _printa_carta_jogada_jogador
         call    _computador_escolhe_carta
+        pushl   %edi
         call    _printa_carta_jogada_maquina
-        jmp finalizar_programa
-        #call    _verifica_carta_vencedora
+        popl    %edi
+        popl    %eax
+        call    _verifica_carta_vencedora
         ret
 
-        #pega a opção digitada pelo menu e retira a carta das cartas sortiadas. retorna
+        #pega a opção digitada pelo menu e altera o vetor de status das cartas. Retorna o indice da carta em cartas_sortiadas em %eax
         _jogador_escolhe_carta:
         movl    $rgeral, %eax
         movl    (%eax), %eax
@@ -642,9 +651,8 @@
         popl    %eax
         ret
 
-        #printa a carta jogada da maquina, a carta deve ser radomica e um indice do vetor e deve ser armazenada em %edi
+        #printa a carta jogada da maquina, a carta deve ser radomica e um indice do vetor e deve ser armazenada em %eax
         _printa_carta_jogada_maquina:
-        movl    %edi, %eax
         movl    $sinais_cartas_maquina, %edi
         addl    %eax, %edi
         pushl   (%edi)
@@ -690,24 +698,33 @@
         addl    $12, %esp
         jmp     _menu_cartas_retorno
 
-        #gera um número randomico e joga uma carta do computador
+        #gera um número randomico e joga uma carta do computador. Retorna o indice em cartas_sortiadas em %edi
         _computador_escolhe_carta:
         call    rand                        #gera numero randomico
         movl    $0, %edx                    #limpando edx
         movl    $3, %ebx                    #iremos pegar apenas numeros entre 0 e 2 assim teremos que dividir por 2
         divl    %ebx
+        pushl   %edx
         cmpl    $0,%edx
         je      _jogar_carta_um_computador
         cmpl    $1, %edx
         je      _jogar_carta_dois_computador
         cmpl    $2, %edx
         je      _jogar_carta_tres_computador
+        _carta_escolhida:
+        popl    %edi
+        pushl   %eax
+        movl    %edi, %eax
+        movl    $0, %edx                    #limpando edx
+        movl    $4, %ebx                    #multiplico por 7 pois é o número de caracteres nos vetores
+        mull    %ebx
+        addl    $12, %eax
+        movl    %eax, %edi
+        popl    %eax
         ret
 
-        #verifica quais das duas cartas é a vencedora, cartas devem estar em %eax e %edi, sendo elas o indice no vetor das cartas sortiadas
+        #verifica quais das duas cartas é a vencedora, cartas devem estar em %eax(Jogador) e %edi(Maquina), sendo elas o indice no vetor das cartas sortiadas
         _verifica_carta_vencedora:
-        pushl   %eax
-        pushl   %edi
         movl    $cartas_sortiadas, %ebx
         addl    %eax, %ebx
         movl    (%ebx), %eax
@@ -716,26 +733,14 @@
         movl    (%ebx), %edi
         cmpl    %eax, %edi
         je      _verificar_sinal_carta_vencedora
-        jl      _primeira_carta_vencedora
-        jmp     _segunda_carta_vencedora
+        jl      _computador_perdeu_mao
+        jmp     _jogador_perdeu_mao
 
         _verificar_sinal_carta_vencedora:
         pushl   $print_carta_vencedora_sinal
         call    printf
         addl    $4, %esp
-        ret
-
-        _primeira_carta_vencedora:
-        pushl   $print_primeira_carta_vencedora
-        call    printf
-        addl    $4, %esp
-        ret
-
-        _segunda_carta_vencedora:
-        pushl   $print_segunda_carta_vencedora
-        call    printf
-        addl    $4, %esp
-        ret
+        jmp     _imprime_acao_mao
 
         _menu_esconde_cartas:
         pushl   $print_escolhe_cartas_esconde
@@ -842,7 +847,7 @@
         pushl $print_pontos
         call  printf
         addl    $12, %esp
-        jmp   _inicia_mao
+        jmp   _imprime_acao_mao
 
         _jogador_perdeu_mao:
         movl  pontos_mao, %eax
@@ -856,31 +861,46 @@
         pushl $print_pontos
         call  printf
         addl    $12, %esp
-        jmp   _inicia_mao
+        jmp   _imprime_acao_mao
 
         #função irá marcar a carta um do computador como usada
         _jogar_carta_um_computador:
         movl   $status_cartas, %edi
-        addl    $12, %eax
+        addl    $12, %edi
         movl    $1, (%edi)
-        movl    $0, %edi
-        ret
+        movl    $0, %eax
+        jmp _carta_escolhida
 
         #função irá marcar a carta dois do computador como usada
         _jogar_carta_dois_computador:
         movl   $status_cartas, %edi
-        addl    $16, %eax
+        addl    $16, %edi
         movl    $1, (%edi)
-        movl    $7, %edi
-        ret
+        movl    $7, %eax
+        jmp _carta_escolhida
 
         #função irá marcar a carta tres do computador como usada
         _jogar_carta_tres_computador:
         movl   $status_cartas, %edi
-        addl    $18, %eax
+        addl    $20, %edi
         movl    $1, (%edi)
-        movl    $14, %edi
+        movl    $14, %eax
+        jmp _carta_escolhida
+
+        _imprime_pontos:
+        movl  $pontos_computador, %eax
+        movl  $pontos_jogador, %ebx
+        pushl (%eax)
+        pushl (%ebx)
+        pushl $print_pontos
+        call  printf
+        addl    $12, %esp
         ret
+
+        _verifica_rodada_acabou:
+        #falta verificar se a rodada acabou
+        ret
+
 
     .globl _start
         _start:
@@ -903,8 +923,6 @@
         call _gerador_semente_aleatoria
 
         call _inicia_mao
-
-        call _imprime_acao_mao1
 
         finalizar_programa:
         pushl   $quebra_linha
