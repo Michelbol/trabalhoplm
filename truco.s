@@ -1,88 +1,78 @@
     .section .data
-        msg_bem_vindo: .asciz "=============================================================\n|                    Bem vindo ao Truco 1.0                 |\n ===========================================================\n"
-        pergunta_inicial: .asciz "Você deseja [i]niciar o Jogo ou [s]air?\n"
-        tempo: .int 4
-        print_numero: .asciz "  %d  "
-        print_palavra: .asciz " %s  "
-        print_cartas_jogador: .asciz    "As cartas da sua mão são:"
-        print_cartas_computador: .asciz "As cartas do computador: "
-        print_vira: .asciz "A vira eh: "
-        print_cartas_sortiadas: .asciz "As cartas sortiadas foram:  "
-        print_status_cartas: .asciz "Os status das cartas sao:  "
-        print_sinais_sortiados: .asciz "Os sinais sortiados foram:  "
-        print_nao_escolheu_nada: .asciz "Não escolheu nenhuma opção "
-        print_escolheu_opcao_um: .asciz "Escolheu a opção um"
-        print_escolheu_opcao_dois: .asciz "Escolheu opção dois"
-        print_escolheu_opcao_tres: .asciz "Escolheu opção tres"
-        print_carta_vencedora_sinal: .asciz "As cartas são iguais, verificando o sinal agora\n"
-        print_jogador_vencedor: .asciz "O jogador ganhou!"
-        print_maquina_vencedora: .asciz "A maquina ganhou!"
-        teste: .asciz "cheguei aqui"
-        cartas_corretas: .asciz "Todas as cartas estao corretas!"
-        contador_em: .asciz "Contador em: %d\n"
-        quebra_linha: .asciz "\n"
-        print_cartas_iguais: .asciz "As cartas informadas são iguais: %s, %s \n"
-        contador: .int 0
-        jogador_jogou_carta: .asciz "Você jogou a carta:      %s de %s\n"
-        maquina_jogou_carta: .asciz "A máquina jogou a carta: %s de %s\n"
-        print_iguais: .asciz " %d e %d"
-        print_diferentes: .asciz "Estas cartas são diferentes!"
-        print_comparando: .asciz "Comparando %d e %d\n"
-        print_gerou_certo: .asciz "deu certo caraio!!!!!!!!!!!!!!!!\n"
-        rgeral: .int 0
-        round: .int 0
+        msg_bem_vindo:                  .asciz "=============================================================\n|                    Bem vindo ao Truco 1.0                 |\n ===========================================================\n"
+        pergunta_inicial:               .asciz "Você deseja [i]niciar o Jogo ou [s]air?\n"
+        print_numero:                   .asciz "  %d  "
+        print_palavra:                  .asciz " %s  "
+        print_cartas_jogador:           .asciz "As cartas da sua mão são:"
+        print_cartas_computador:        .asciz "As cartas do computador: "
+        print_vira:                     .asciz "A vira eh: "
+        print_cartas_sortiadas:         .asciz "As cartas sortiadas foram:  "
+        print_status_cartas:            .asciz "Os status das cartas sao:  "
+        print_sinais_sortiados:         .asciz "Os sinais sortiados foram:  "
+        print_nao_escolheu_nada:        .asciz "Não escolheu nenhuma opção "
+        print_escolheu_opcao_um:        .asciz "Escolheu a opção um"
+        print_escolheu_opcao_dois:      .asciz "Escolheu opção dois"
+        print_escolheu_opcao_tres:      .asciz "Escolheu opção tres"
+        print_carta_vencedora_sinal:    .asciz "As cartas são iguais, verificando o sinal agora\n"
+        print_jogador_vencedor:         .asciz "O jogador ganhou!"
+        print_maquina_vencedora:        .asciz "A maquina ganhou!"
+        print_rodada:                   .asciz "Estamos na rodada: %d\n"
+        teste:                          .asciz "cheguei aqui"
+        cartas_corretas:                .asciz "Todas as cartas estao corretas!"
+        contador_em:                    .asciz "Contador em: %d\n"
+        quebra_linha:                   .asciz "\n"
+        print_cartas_iguais:            .asciz "As cartas informadas são iguais: %s, %s \n"
+        print_iguais:                   .asciz " %d e %d"
+        print_diferentes:               .asciz "Estas cartas são diferentes!"
+        print_comparando:               .asciz "Comparando %d e %d\n"
+        print_gerou_certo:              .asciz "deu certo caraio!!!!!!!!!!!!!!!!\n"
+        jogador_jogou_carta:            .asciz "Você jogou a carta:      %s de %s\n"
+        maquina_jogou_carta:            .asciz "A máquina jogou a carta: %s de %s\n"
+        print_jogador_ganhou:           .asciz "O jogador ganhou!"
+        print_computador_ganhou:        .asciz "O computador ganhou!"
+        print_acao_mao1:                .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
+        print_acao_mao11:               .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
+        print_escolhe_cartas:           .asciz "Escolha uma das cartas abaixo:\n"
+        print_escolhe_carta_um:         .asciz "Carta [1]: %s %s\n"
+        print_escolhe_carta_dois:       .asciz "Carta [2]: %s %s\n"
+        print_escolhe_carta_tres:       .asciz "Carta [3]: %s %s"
+        print_jogador_ganhou_mao:       .asciz "O jogador ganhou a mao!!\n"
+        print_computador_ganhou_mao:    .asciz "O computador ganhou a mao!!\n"
+        print_jogador_ganhou_tento:     .asciz "O jogador ganhou o tento!\n"
+        print_computador_ganhou_tento:  .asciz "O computador ganhou o tento!\n"
+        print_computador_pediu_seis:    .asciz "O computador pediu seis!\n[1] Pedir Nove\n[2] Correr\n"
+        print_computador_aceitou:       .asciz "O computador aceitou o pedido!\n"
+        print_pontos:                   .asciz "\nPONTOS:\nJOGADOR: %d\nCOMPUTADOR: %d\n\n\n\n"
+        print_escolhe_cartas_esconde:   .asciz "Escolha uma das cartas abaixo para jogar escondido:\n" #joao
+        cartas:                         .asciz "4     ", "5     ", "6     ", "7     ", "Dama  ", "Valete", "Reis  ", "As    ", "2     ", "3     "
+        sinais:                         .asciz "Ouros ", "Espada", "Copas ", "Paus  "
+        pause_enter:                    .asciz "====================================Pressione <Enter>===================================="
+        tempo:              .int 4
+        contador:           .int 0
+        rgeral:             .int 0
+        rodada:             .int 0
+        pontos_mao:         .int 0
+        pontos_jogador:     .int 0
+        pontos_computador:  .int 0
+        manilha:            .int 0
 
-        cartas_maquina: .space 28
-        sinais_cartas_maquina: .space 28
-        cartas_jogador: .space 28
-        sinais_cartas_jogador: .space 28
+        cartas_maquina:         .space 28
+        sinais_cartas_maquina:  .space 28
+        cartas_jogador:         .space 28
+        sinais_cartas_jogador:  .space 28
+        cartas_sortiadas:       .space 32
+        sinais_sortiados:       .space 32
+        vira:                   .space 14
+        sinal_vira:             .space 14
 
-        print_jogador_ganhou: .asciz "O jogador ganhou!"
-        print_computador_ganhou: .asciz "O computador ganhou!"
+        status_cartas:  .int 0,0,0,0,0,0 # 0 = não jogada, 1 = jogada
+        rodadas:        .int 0,0,0 #0 = nao jogada, 1 = jogador, 2 = maquina
 
-        print_acao_mao1: .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
-        print_acao_mao11: .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
-        print_escolhe_cartas: .asciz "Escolha uma das cartas abaixo:\n"
-        print_escolhe_carta_um: .asciz "Carta [1]: %s %s\n"
-        print_escolhe_carta_dois: .asciz "Carta [2]: %s %s\n"
-        print_escolhe_carta_tres: .asciz "Carta [3]: %s %s"
-
-        print_jogador_ganhou_mao: .asciz "O jogador ganhou a mao!!\n"
-        print_computador_ganhou_mao: .asciz "O computador ganhou a mao!!\n"
-        print_jogador_ganhou_tento: .asciz "O jogador ganhou o tento!\n"
-        print_computador_ganhou_tento: .asciz "O computador ganhou o tento!\n"
-
-        print_computador_pediu_seis: .asciz "O computador pediu seis!\n[1] Pedir Nove\n[2] Correr\n"
-
-        print_computador_aceitou: .asciz "O computador aceitou o pedido!\n"
-
-        print_pontos: .asciz "\nPONTOS:\nJOGADOR: %d\nCOMPUTADOR: %d\n\n\n\n"
-
-        print_escolhe_cartas_esconde: .asciz "Escolha uma das cartas abaixo para jogar escondido:\n" #joao
-
-        pontos_mao: .int 0
-        pontos_jogador: .int 0
-        pontos_computador: .int 0
-
-        cartas: .asciz "4     ", "5     ", "6     ", "7     ", "Dama  ", "Valete", "Reis  ", "As    ", "2     ", "3     "
-        sinais: .asciz "Ouros ", "Espada", "Copas ", "Paus  "
-        cartas_sortiadas: .space 32
-        sinais_sortiados: .space 32
-        status_cartas: .int 0,0,0,0,0,0,0 # 0 = não jogada, 1 = jogada
-        manilha: .int 0
         sinal_manilha: .asciz ""
-        vira: .space 14
-        sinal_vira: .space 14
-        cmp_carta1: .asciz ""
-        cmp_carta2: .asciz ""
-        cmp_carta3: .asciz ""
-        cmp_sinal1: .asciz ""
-        cmp_sinal2: .asciz ""
-        cmp_sinal3: .asciz ""
-
-        formato_string: .asciz "%*c"
-        formato_numero: .asciz "%d"
-        resposta_inicial: .asciz "%s"
+        formato_string:     .asciz "%*c"
+        formato_numero:     .asciz "%d"
+        resposta_inicial:   .asciz "%s"
+        limpabuf:           .string "%*c"
     #=============================================================fim váriaveis===============================================================
 
         _gerador_semente_aleatoria:
@@ -381,7 +371,7 @@
         pushl   $print_status_cartas
         call    printf
         addl    $4, %esp
-        movl    $7, %ecx
+        movl    $6, %ecx
         movl    $status_cartas, %ebx
         _impressao_status_cartas:
         pushl   %ecx
@@ -524,6 +514,20 @@
 
     _reiniciar_variaveis:
     movl    $0, contador
+    movl    $status_cartas, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
+    movl    $0, rodada
     ret
 
     _inicia_mao:
@@ -559,19 +563,21 @@
 
         call _verifica_tem_vencedor
 
-        movl $1, pontos_mao
-
         call _imprime_acao_mao
 
         ret
 
     _imprime_acao_mao:
-        call _verifica_rodada_acabou
-        pushl $print_acao_mao1
-        call printf
-        pushl $rgeral
-        pushl $formato_numero
-        call scanf
+        addl    $1, rodada
+        movl    $1, pontos_mao
+        call    _verifica_rodada_acabou
+        cmpl    $1, %eax
+        je      _inicia_mao
+        pushl   $print_acao_mao1
+        call    printf
+        pushl   $rgeral
+        pushl   $formato_numero
+        call    scanf
         addl    $12, %esp
         movl    $rgeral, %eax
         cmpl    $1, (%eax)
@@ -740,6 +746,7 @@
         pushl   $print_carta_vencedora_sinal
         call    printf
         addl    $4, %esp
+        call    pausa_sistema
         jmp     _imprime_acao_mao
 
         _menu_esconde_cartas:
@@ -836,32 +843,42 @@
 
 
         _computador_perdeu_mao:
-        movl  pontos_mao, %eax
-        addl  %eax, pontos_jogador
-        pushl $print_jogador_ganhou_mao
-        call  printf
-        movl  $pontos_computador, %eax
-        movl  $pontos_jogador, %ebx
-        pushl (%eax)
-        pushl (%ebx)
-        pushl $print_pontos
-        call  printf
-        addl    $12, %esp
-        jmp   _imprime_acao_mao
+        movl    pontos_mao, %eax
+        addl    %eax, pontos_jogador
+        #movl    $rodada, %eax
+        #movl    $1, %ebx
+        #sub     %ebx, %eax
+        #movl    $4, %ebx
+        #mull    %ebx
+        #movl    rodadas, %edi
+        #addl    %eax, %edi
+        #movl    $2, (%edi)
+        pushl   $print_jogador_ganhou_mao
+        call    printf
+        addl    $4, %esp
+        movl    $pontos_computador, %eax
+        movl    $pontos_jogador, %ebx
+        call    pausa_sistema
+        jmp     _imprime_acao_mao
 
         _jogador_perdeu_mao:
-        movl  pontos_mao, %eax
-        addl  %eax, pontos_computador
-        pushl $print_computador_ganhou_mao
-        call  printf
-        movl  $pontos_computador, %eax
-        movl  $pontos_jogador, %ebx
-        pushl (%eax)
-        pushl (%ebx)
-        pushl $print_pontos
-        call  printf
-        addl    $12, %esp
-        jmp   _imprime_acao_mao
+        movl    pontos_mao, %eax
+        addl    %eax, pontos_computador
+        #movl    $rodada, %eax
+        #movl    $1, %ebx
+        #sub     %ebx, %eax
+        #movl    $4, %ebx
+        #mull    %ebx
+        #movl    rodadas, %edi
+        #addl    %eax, %edi
+        #movl    $1, (%edi)
+        pushl   $print_computador_ganhou_mao
+        call    printf
+        addl    $4, %esp
+        movl    $pontos_computador, %eax
+        movl    $pontos_jogador, %ebx
+        call    pausa_sistema
+        jmp     _imprime_acao_mao
 
         #função irá marcar a carta um do computador como usada
         _jogar_carta_um_computador:
@@ -888,6 +905,11 @@
         jmp _carta_escolhida
 
         _imprime_pontos:
+        movl    rodada, %edi
+        pushl   %edi
+        pushl   $print_rodada
+        call    printf
+        addl    $8, %esp
         movl  $pontos_computador, %eax
         movl  $pontos_jogador, %ebx
         pushl (%eax)
@@ -898,7 +920,29 @@
         ret
 
         _verifica_rodada_acabou:
-        #falta verificar se a rodada acabou
+        call    _imprime_status_cartas
+        movl    $status_cartas, %edi
+        movl    $6, %ecx
+        _verificando_rodada_acabou:
+        cmpl    $0, (%edi)
+        je      _rodada_nao_acabou
+        addl    $4, %edi
+        loop    _verificando_rodada_acabou
+        jmp     _rodada_acabou
+        _rodada_acabou:
+        movl    $1, %eax
+        ret
+        _rodada_nao_acabou:
+        movl    $0, %eax
+        ret
+
+        pausa_sistema:
+        pushl   $pause_enter
+        call    printf
+        pushl   $limpabuf
+        call    scanf
+        call    getchar
+        addl    $8, %esp
         ret
 
 
