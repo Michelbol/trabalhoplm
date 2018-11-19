@@ -8,6 +8,7 @@
         print_vira:                     .asciz "A vira eh: "
         print_cartas_sortiadas:         .asciz "As cartas sortiadas foram:  "
         print_status_cartas:            .asciz "Os status das cartas sao:  "
+        print_rodadas:                  .asciz "As rodadas sao: "
         print_sinais_sortiados:         .asciz "Os sinais sortiados foram:  "
         print_nao_escolheu_nada:        .asciz "Não escolheu nenhuma opção "
         print_escolheu_opcao_um:        .asciz "Escolheu a opção um"
@@ -17,6 +18,7 @@
         print_jogador_vencedor:         .asciz "O jogador ganhou!"
         print_maquina_vencedora:        .asciz "A maquina ganhou!"
         print_rodada:                   .asciz "Estamos na rodada: %d\n"
+        opcao_invalida:                 .asciz "\nVocê digitou uma opcao invalida, digite novamente\n"
         teste:                          .asciz "cheguei aqui"
         cartas_corretas:                .asciz "Todas as cartas estao corretas!"
         contador_em:                    .asciz "Contador em: %d\n"
@@ -65,6 +67,8 @@
         pontos_jogador:     .int 0
         pontos_computador:  .int 0
         manilha:            .int 0
+        rodadas_vencidas_m: .int 0
+        rodadas_vencidas_j: .int 0
 
         cartas_maquina:         .space 28
         sinais_cartas_maquina:  .space 28
@@ -399,6 +403,28 @@
         addl    $4, %esp
         ret
 
+        _imprime_rodadas:
+        pushl   $print_rodadas
+        call    printf
+        addl    $4, %esp
+        movl    $3, %ecx
+        movl    $rodadas, %ebx
+        _impressao_rodadas:
+        pushl   %ecx
+        pushl   %ebx
+        pushl   (%ebx)
+        pushl   $print_numero
+        call    printf
+        addl    $8, %esp
+        popl    %ebx
+        addl    $4, %ebx
+        popl    %ecx
+        loop    _impressao_rodadas
+        pushl   $quebra_linha
+        call    printf
+        addl    $4, %esp
+        ret
+
         _imprime_sinais_cartas_sortiadas:
         pushl   $print_sinais_sortiados
         call    printf
@@ -538,6 +564,15 @@
     movl    $0, (%eax)
     addl    $4, %eax
     movl    $0, rodada
+    movl    $0, rodadas_vencidas_j
+    movl    $0, rodadas_vencidas_m
+    movl    $rodadas, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
+    movl    $0, (%eax)
+    addl    $4, %eax
     ret
 
     _inicia_mao:
@@ -578,6 +613,8 @@
         ret
 
     _imprime_acao_mao:
+        call    _verifica_vencedor_rodada
+        call    _imprime_rodadas
         addl    $1, rodada
         movl    $1, pontos_mao
         movl    rodada, %edi
@@ -590,6 +627,7 @@
         je      _inicia_mao
         pushl   $print_acao_mao1
         call    printf
+        _opcao_errada:
         pushl   $rgeral
         pushl   $formato_numero
         call    scanf
@@ -601,6 +639,10 @@
         je      _menu_esconde_cartas
         cmpl    $3, (%eax)
         je      _menu_pede_truco_jogador
+        pushl   $opcao_invalida
+        call    printf
+        addl    $4, %esp
+        jmp     _opcao_errada
         ret
 
         _menu_cartas:
@@ -625,6 +667,17 @@
         pushl   $formato_numero
         call    scanf
         addl    $12, %esp
+        cmpl   $0, rgeral
+        je      _opcao_valida
+        cmpl    $1, rgeral
+        je      _opcao_valida
+        cmpl    $2, rgeral
+        je      _opcao_valida
+        pushl   $opcao_invalida
+        call    printf
+        addl    $4, %esp
+        jmp     _menu_cartas_retorno
+        _opcao_valida:
         call    _jogador_escolhe_carta
         pushl   %eax
         call    _printa_carta_jogada_jogador
@@ -969,16 +1022,15 @@
 
 
         _computador_perdeu_mao:
-        movl    pontos_mao, %eax
-        addl    %eax, pontos_jogador
-        #movl    $rodada, %eax
-        #movl    $1, %ebx
-        #sub     %ebx, %eax
-        #movl    $4, %ebx
-        #mull    %ebx
-        #movl    rodadas, %edi
-        #addl    %eax, %edi
-        #movl    $2, (%edi)
+        movl    rodada, %eax
+        movl    $1, %ebx
+        sub     %ebx, %eax
+        movl    $4, %ebx
+        mull    %ebx
+        movl    $rodadas, %edi
+        addl    %eax, %edi
+        movl    $1, (%edi)
+        addl    $1, rodadas_vencidas_j
         pushl   $print_jogador_ganhou_mao
         call    printf
         addl    $4, %esp
@@ -988,16 +1040,15 @@
         jmp     _imprime_acao_mao
 
         _jogador_perdeu_mao:
-        movl    pontos_mao, %eax
-        addl    %eax, pontos_computador
-        #movl    $rodada, %eax
-        #movl    $1, %ebx
-        #sub     %ebx, %eax
-        #movl    $4, %ebx
-        #mull    %ebx
-        #movl    rodadas, %edi
-        #addl    %eax, %edi
-        #movl    $1, (%edi)
+        movl    rodada, %eax
+        movl    $1, %ebx
+        sub     %ebx, %eax
+        movl    $4, %ebx
+        mull    %ebx
+        movl    $rodadas, %edi
+        addl    %eax, %edi
+        movl    $2, (%edi)
+        addl    $1, rodadas_vencidas_m
         pushl   $print_computador_ganhou_mao
         call    printf
         addl    $4, %esp
@@ -1055,6 +1106,21 @@
         _rodada_nao_acabou:
         movl    $0, %eax
         ret
+
+        _verifica_vencedor_rodada:
+        cmpl    $2, rodadas_vencidas_m
+        je      _maquina_vencedor_rodada
+        cmpl    $2, rodadas_vencidas_j
+        je      _jogador_vencedor_rodada
+        ret
+
+        _jogador_vencedor_rodada:
+        addl   $1, pontos_jogador
+        jmp     _inicia_mao
+
+        _maquina_vencedor_rodada:
+        addl    $1, pontos_computador
+        jmp     _inicia_mao
 
         pausa_sistema:
         pushl   $pause_enter
