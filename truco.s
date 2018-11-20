@@ -32,6 +32,8 @@
         maquina_jogou_carta:            .asciz "A máquina jogou a carta: %s de %s\n"
         print_jogador_ganhou:           .asciz "O jogador ganhou!"
         print_computador_ganhou:        .asciz "O computador ganhou!"
+        print_acao_mao_com_truco:       .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
+        print_acao_mao_sem_truco:       .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
         print_acao_mao1:                .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
         print_acao_mao11:               .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
         print_escolhe_cartas:           .asciz "Escolha uma das cartas abaixo:\n"
@@ -45,7 +47,8 @@
         print_computador_pediu_seis:    .asciz "O computador pediu seis!\n[1] Pedir Nove\n[2] Correr\n"
         print_computador_aceitou:       .asciz "O computador aceitou o pedido!\n"
         print_pontos:                   .asciz "\nPONTOS:\nJOGADOR: %d\nCOMPUTADOR: %d\n\n\n\n"
-        print_escolhe_cartas_esconde:   .asciz "Escolha uma das cartas abaixo para jogar escondido:\n" #joao
+        print_escolhe_cartas_esconde:   .asciz "Escolha uma das cartas abaixo para jogar escondido:\n"
+        print_duas_cartas_manilha:      .asciz "As duas cartas sao manilhas"
         cartas:                         .asciz "4     ", "5     ", "6     ", "7     ", "Dama  ", "Valete", "Reis  ", "As    ", "2     ", "3     "
         sinais:                         .asciz "Ouros ", "Espada", "Copas ", "Paus  "
         pause_enter:                    .asciz "====================================Pressione <Enter>===================================="
@@ -82,7 +85,9 @@
         status_cartas:  .int 0,0,0,0,0,0 # 0 = não jogada, 1 = jogada
         rodadas:        .int 0,0,0 #0 = nao jogada, 1 = jogador, 2 = maquina
 
-        sinal_manilha: .asciz ""
+        quem_comeca  .int 0 #joao #0 = jogador 1 = computador
+        ultimo_truco .int 0 #joao #0 = jogador 1 = computador
+
         formato_string:     .asciz "%*c"
         formato_numero:     .asciz "%d"
         resposta_inicial:   .asciz "%s"
@@ -208,6 +213,11 @@
         movl    $0, %edx                    #limpando edx
         movl    $7, %ebx                    #multiplico por 7 pois é o número de caracteres nos vetores
         mull    %ebx
+        movl    %eax, manilha
+        addl    $7, manilha
+        cmpl    $63, manilha
+        jg      _manilha_eh_quatro
+        _retorno_manilha_eh_quatro:
         movl    $cartas, %edi               #salvo vetor em %edi para movimentar
         addl    %eax, %edi                  #movimento o vetor de acordo com a posição que foi calculada (7 * random) = posição do vetor
         addl    $8, %esp                    #limpando a pilha
@@ -218,6 +228,9 @@
         movl    %eax, (%edx)
         addl    $4, %edx
             ret
+        _manilha_eh_quatro:
+        movl    $0, manilha
+        jmp     _retorno_manilha_eh_quatro
 
         _gera_sinal_vira:
         movl    $sinal_vira, %ebx
@@ -298,6 +311,10 @@
         pushl   $quebra_linha
         call    printf
         addl    $4, %esp
+        pushl   manilha
+        pushl   $print_numero
+        call    printf
+        addl    $8, %esp
             ret
 
 
@@ -625,7 +642,7 @@
         call    _verifica_rodada_acabou
         cmpl    $1, %eax
         je      _inicia_mao
-        pushl   $print_acao_mao1
+        pushl   $print_acao_mao_com_truco
         call    printf
         _opcao_errada:
         pushl   $rgeral
@@ -667,11 +684,11 @@
         pushl   $formato_numero
         call    scanf
         addl    $12, %esp
-        cmpl   $0, rgeral
-        je      _opcao_valida
-        cmpl    $1, rgeral
+        cmpl   $1, rgeral
         je      _opcao_valida
         cmpl    $2, rgeral
+        je      _opcao_valida
+        cmpl    $3, rgeral
         je      _opcao_valida
         pushl   $opcao_invalida
         call    printf
@@ -910,16 +927,37 @@
 
         #verifica quais das duas cartas é a vencedora, cartas devem estar em %eax(Jogador) e %edi(Maquina), sendo elas o indice no vetor das cartas sortiadas
         _verifica_carta_vencedora:
+        movl    manilha, %edx
         movl    $cartas_sortiadas, %ebx
         addl    %eax, %ebx
         movl    (%ebx), %eax
         movl    $cartas_sortiadas, %ebx
         addl    %edi, %ebx
         movl    (%ebx), %edi
+        cmpl    %edx, %eax
+        je      _primeira_carta_manilha
+        cmpl    %edx, %edi
+        je      _segunda_carta_manilha
         cmpl    %eax, %edi
         je      _verificar_sinal_carta_vencedora
-        jl      _computador_perdeu_mao
-        jmp     _jogador_perdeu_mao
+        jl      _computador_perdeu_tento
+        jmp     _jogador_perdeu_tento
+        _primeira_carta_manilha:
+        cmpl    %edx, %edi
+        je      _primeira_e_segunda_cartas_manilha
+        jmp     _computador_perdeu_tento
+        _segunda_carta_manilha:
+        jmp     _jogador_perdeu_tento
+        _primeira_e_segunda_cartas_manilha:
+        movl    $sinais_sortiados, %ebx
+        addl    %eax, %ebx
+        movl    (%ebx), %eax
+        movl    $sinais_sortiados, %ebx
+        addl    %edi, %ebx
+        movl    (%ebx), %edi
+        cmpl    %edx, %eax
+        jl      _computador_perdeu_tento
+        jmp     _jogador_perdeu_tento
 
         _verificar_sinal_carta_vencedora:
         pushl   $print_carta_vencedora_sinal
@@ -989,7 +1027,7 @@
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
         cmpl    $0, %edx                    #50%  de chance de ser 0
-        je      _computador_perdeu_mao
+        je      _computador_perdeu_rodada
         #Aqui será calculado se o computador ira pedir seis ou não
         _menu_pede_seis_jogador:
         addl    $2, pontos_mao
@@ -1006,6 +1044,7 @@
         jmp     _menu_cartas
 
         _menu_responde_seis_jogador:
+        movl    $1, ultimo_truco #Truco está com o computador
         pushl   $print_computador_pediu_seis
         call    printf
         pushl   $rgeral
@@ -1016,12 +1055,38 @@
         cmpl    $1, (%eax)
         je      _menu_pede_nove_jogador
         cmpl    $2, (%eax)
-        je      _jogador_perdeu_mao
+        je      _jogador_perdeu_rodada #joao
         _menu_pede_nove_jogador:
+        #Aqui será calculado se o computador ira correr ou não do nove
+        addl    $3, pontos_mao
+        movl    $0, ultimo_truco #joao #Truco está com o jogador
+        call    rand                        #gera numero randomico
+        pushl   %eax                        #eax contem o numero randomico
+        movl    $0, %edx                    #limpando edx
+        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        divl    %ebx
+        pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+        cmpl    $0, %edx                    #50%  de chance de ser 0
+        je      _computador_perdeu_rodada #joao
+        #Aqui será calculado se o computador ira pedir doze ou não
+        _menu_pede_doze_jogador:
+        addl    $2, pontos_mao
+        call    rand                        #gera numero randomico
+        pushl   %eax                        #eax contem o numero randomico
+        movl    $0, %edx                    #limpando edx
+        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        divl    %ebx
+        pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+        cmpl    $0, %edx                    #50%  de chance de ser 0
+        je      _menu_responde_seis_jogador
+        pushl   $print_computador_aceitou
+        call    printf
+        jmp     _menu_cartas
         jmp     finalizar_programa
 
 
-        _computador_perdeu_mao:
+
+        _computador_perdeu_tento:
         movl    rodada, %eax
         movl    $1, %ebx
         sub     %ebx, %eax
@@ -1039,7 +1104,7 @@
         call    pausa_sistema
         jmp     _imprime_acao_mao
 
-        _jogador_perdeu_mao:
+        _jogador_perdeu_tento:
         movl    rodada, %eax
         movl    $1, %ebx
         sub     %ebx, %eax
@@ -1049,6 +1114,45 @@
         addl    %eax, %edi
         movl    $2, (%edi)
         addl    $1, rodadas_vencidas_m
+        pushl   $print_computador_ganhou_mao
+        call    printf
+        addl    $4, %esp
+        movl    $pontos_computador, %eax
+        movl    $pontos_jogador, %ebx
+        call    pausa_sistema
+        jmp     _imprime_acao_mao
+
+
+		#joao
+		_computador_perdeu_rodada:
+        movl    rodada, %eax
+        movl    $1, %ebx
+        sub     %ebx, %eax
+        movl    $4, %ebx
+        mull    %ebx
+        movl    $rodadas, %edi
+        addl    %eax, %edi
+        movl    $1, (%edi)
+        addl    $2, rodadas_vencidas_j
+        pushl   $print_jogador_ganhou_mao
+        call    printf
+        addl    $4, %esp
+        movl    $pontos_computador, %eax
+        movl    $pontos_jogador, %ebx
+        call    pausa_sistema
+        jmp     _imprime_acao_mao
+
+		#joao
+        _jogador_perdeu_rodada:
+        movl    rodada, %eax
+        movl    $1, %ebx
+        sub     %ebx, %eax
+        movl    $4, %ebx
+        mull    %ebx
+        movl    $rodadas, %edi
+        addl    %eax, %edi
+        movl    $2, (%edi)
+        addl    $2, rodadas_vencidas_m
         pushl   $print_computador_ganhou_mao
         call    printf
         addl    $4, %esp
