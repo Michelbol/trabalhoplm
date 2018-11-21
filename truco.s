@@ -14,7 +14,9 @@
         print_escolheu_opcao_um:        .asciz "Escolheu a opção um"
         print_escolheu_opcao_dois:      .asciz "Escolheu opção dois"
         print_escolheu_opcao_tres:      .asciz "Escolheu opção tres"
-        print_carta_vencedora_sinal:    .asciz "As cartas são iguais, verificando o sinal agora\n"
+        print_empate:                   .asciz "===============Empatou!===============\n"
+        print_empate_segunda_rodada:    .asciz "Segunda Rodada! Quem fez a primeira ganha!\n"
+        print_empate_terceira_rodada:   .asciz "Terceira Rodada! Quem fez a primeira ganha!\n"
         print_jogador_vencedor:         .asciz "O jogador ganhou!"
         print_maquina_vencedora:        .asciz "A maquina ganhou!"
         print_rodada:                   .asciz "Estamos na rodada: %d\n"
@@ -34,8 +36,9 @@
         print_computador_ganhou:        .asciz "O computador ganhou!"
         print_acao_mao_com_truco:       .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
         print_acao_mao_sem_truco:       .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
-        print_acao_mao1:                .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Trucar!\n"
-        print_acao_mao11:               .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n"
+        print_acao_mao_com_seis:        .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Pedir Seis!\n"
+        print_acao_mao_com_nove:        .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Pedir Nove!\n"
+        print_acao_mao_com_doze:        .asciz "Digite:\n[1] Jogar uma Carta\n[2] Esconder uma Carta\n[3] Pedir Doze!\n"
         print_escolhe_cartas:           .asciz "Escolha uma das cartas abaixo:\n"
         print_escolhe_carta_um:         .asciz "Carta [1]: %s %s\n"
         print_escolhe_carta_dois:       .asciz "Carta [2]: %s %s\n"
@@ -44,7 +47,10 @@
         print_computador_ganhou_mao:    .asciz "O computador ganhou a mao!!\n"
         print_jogador_ganhou_tento:     .asciz "O jogador ganhou o tento!\n"
         print_computador_ganhou_tento:  .asciz "O computador ganhou o tento!\n"
-        print_computador_pediu_seis:    .asciz "O computador pediu seis!\n[1] Pedir Nove\n[2] Correr\n"
+        print_computador_pediu_truco:	.asciz "O computador pediu truco!\n[1] Aceitar \n[2] Pedir Seis \n[3] Correr\n"
+        print_computador_pediu_seis:    .asciz "O computador pediu seis!\n[1] Aceitar \n[2] Pedir Nove \n[3] Correr\n"
+        print_computador_pediu_nove:	.asciz "O computador pediu nove!\n[1] Aceitar \n[2] Pedir Doze \n[3] Correr\n"
+        print_computador_pediu_doze:	.asciz "O computador pediu doze!\n[1] Aceitar \n[2] Correr\n"
         print_computador_aceitou:       .asciz "O computador aceitou o pedido!\n"
         print_pontos:                   .asciz "\nPONTOS:\nJOGADOR: %d\nCOMPUTADOR: %d\n\n\n\n"
         print_escolhe_cartas_esconde:   .asciz "Escolha uma das cartas abaixo para jogar escondido:\n"
@@ -72,6 +78,8 @@
         manilha:            .int 0
         rodadas_vencidas_m: .int 0
         rodadas_vencidas_j: .int 0
+        quem_comeca:        .int 0 #0 = jogador 1 = computador
+        ultimo_truco:       .int 0 #0 = jogador 1 = computador
 
         cartas_maquina:         .space 28
         sinais_cartas_maquina:  .space 28
@@ -83,10 +91,7 @@
         sinal_vira:             .space 14
 
         status_cartas:  .int 0,0,0,0,0,0 # 0 = não jogada, 1 = jogada
-        rodadas:        .int 0,0,0 #0 = nao jogada, 1 = jogador, 2 = maquina
-
-        quem_comeca  .int 0 #joao #0 = jogador 1 = computador
-        ultimo_truco .int 0 #joao #0 = jogador 1 = computador
+        rodadas:        .int 0,0,0 #0 = nao jogada, 1 = jogador, 2 = maquina, 3 = empate
 
         formato_string:     .asciz "%*c"
         formato_numero:     .asciz "%d"
@@ -311,10 +316,6 @@
         pushl   $quebra_linha
         call    printf
         addl    $4, %esp
-        pushl   manilha
-        pushl   $print_numero
-        call    printf
-        addl    $8, %esp
             ret
 
 
@@ -590,6 +591,8 @@
     addl    $4, %eax
     movl    $0, (%eax)
     addl    $4, %eax
+    movl    $1, pontos_mao
+    movl    $0, ultimo_truco
     ret
 
     _inicia_mao:
@@ -611,7 +614,7 @@
 
         call _verifica_carta
 
-        #call _imprime_cartas_maquina
+        call _imprime_cartas_maquina
 
         call _imprime_cartas_jogador
 
@@ -631,7 +634,6 @@
 
     _imprime_acao_mao:
         call    _verifica_vencedor_rodada
-        call    _imprime_rodadas
         addl    $1, rodada
         movl    $1, pontos_mao
         movl    rodada, %edi
@@ -642,8 +644,41 @@
         call    _verifica_rodada_acabou
         cmpl    $1, %eax
         je      _inicia_mao
-        pushl   $print_acao_mao_com_truco
+		cmpl 	$1, ultimo_truco #Jogador não pode pedir truco
+		je		print_sem_truco
+		cmpl 	$11, pontos_computador #Jogador não pode pedir truco
+		je		print_sem_truco
+		cmpl 	$11, pontos_jogador #Jogador não pode pedir truco
+		je		print_sem_truco
+		cmpl 	$1, pontos_mao
+		je		print_com_truco
+		cmpl 	$3, pontos_mao
+		je		print_com_seis
+		cmpl 	$6, pontos_mao
+		je		print_com_nove
+		cmpl 	$9, pontos_mao
+		je		print_com_doze
+		jmp		print_sem_truco #CASO FOR DOZE
+		print_sem_truco:
+        pushl   $print_acao_mao_sem_truco
         call    printf
+		jmp		_opcao_errada
+		print_com_truco:
+		pushl   $print_acao_mao_com_truco
+        call    printf
+		jmp		_opcao_errada
+		print_com_seis:
+		pushl   $print_acao_mao_com_seis
+        call    printf
+		jmp		_opcao_errada
+		print_com_nove:
+		pushl   $print_acao_mao_com_nove
+        call    printf
+		jmp		_opcao_errada
+		print_com_doze:
+		pushl   $print_acao_mao_com_doze
+        call    printf
+		jmp		_opcao_errada
         _opcao_errada:
         pushl   $rgeral
         pushl   $formato_numero
@@ -698,6 +733,25 @@
         call    _jogador_escolhe_carta
         pushl   %eax
         call    _printa_carta_jogada_jogador
+        cmpl $2, ultimo_truco
+        je _computador_faz_jogada
+        cmpl $11, pontos_computador
+        je _computador_faz_jogada
+        cmpl $11, pontos_jogador
+        je _computador_faz_jogada
+        cmpl $12, pontos_mao
+        je _computador_faz_jogada
+        ##Terminar chamada do truco do computador
+        call    rand                        #gera numero randomico
+        pushl   %eax                        #eax contem o numero randomico
+        movl    $0, %edx                    #limpando edx
+        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        divl    %ebx
+        pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+        cmpl    $0, %edx                    #50%  de chance de ser 0
+        je      _computador_perdeu_rodada	#Correu do Truco
+
+        _computador_faz_jogada:
         call    _computador_escolhe_carta
         pushl   %edi
         call    _printa_carta_jogada_maquina
@@ -897,9 +951,6 @@
         pushl   $1
         jmp     _jogar_carta_dois_computador
         _carta_tres_valida_dois:
-        pushl   $carta_dois_valida_carta_tres_tb
-        call    printf
-        addl    $4, %esp
         movl    $cartas_sortiadas, %edi
         addl    $16, %edi
         pushl   (%edi)
@@ -939,7 +990,7 @@
         cmpl    %edx, %edi
         je      _segunda_carta_manilha
         cmpl    %eax, %edi
-        je      _verificar_sinal_carta_vencedora
+        je      _empatou
         jl      _computador_perdeu_tento
         jmp     _jogador_perdeu_tento
         _primeira_carta_manilha:
@@ -959,12 +1010,48 @@
         jl      _computador_perdeu_tento
         jmp     _jogador_perdeu_tento
 
-        _verificar_sinal_carta_vencedora:
-        pushl   $print_carta_vencedora_sinal
+        _empatou:
+        pushl   $print_empate
         call    printf
         addl    $4, %esp
-        call    pausa_sistema
+        cmpl    $1, rodada
+        je      _empatou_primeira_rodada
+        cmpl    $2, rodada
+        je      _empatou_segunda_rodada
+        cmpl    $3, rodada
+        je      _empatou_terceira_rodada
         jmp     _imprime_acao_mao
+
+        _empatou_primeira_rodada:
+        movl    $rodadas, %edi
+        movl    $3, (%edi)
+        jmp     _imprime_acao_mao
+
+        _empatou_segunda_rodada:
+        pushl   $print_empate_segunda_rodada
+        call    printf
+        addl    $4, %esp
+        movl    $rodadas, %edi
+        addl    $4, %edi
+        movl    $3, (%edi)
+        subl    $4, %edi
+        cmpl    $1, (%edi)
+        je      _computador_perdeu_tento
+        cmpl    $2, (%edi)
+        je      _jogador_perdeu_tento
+
+        _empatou_terceira_rodada:
+        pushl   $print_empate_terceira_rodada
+        call    printf
+        addl    $4, %esp
+        movl    $rodadas, %edi
+        addl    $8, %edi
+        movl    $3, (%edi)
+        subl    $8, %edi
+        cmpl    $1, (%edi)
+        je      _computador_perdeu_tento
+        cmpl    $2, (%edi)
+        je      _jogador_perdeu_tento
 
         _menu_esconde_cartas:
         pushl   $print_escolhe_cartas_esconde
@@ -1019,6 +1106,7 @@
         jmp     _menu_esconde_cartas_retorno
 
         _menu_pede_truco_jogador:
+        movl    $1, ultimo_truco #Truco está com o computador
         #Aqui será calculado se o computador ira correr ou não
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
@@ -1027,10 +1115,10 @@
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
         cmpl    $0, %edx                    #50%  de chance de ser 0
-        je      _computador_perdeu_rodada
+        je      _computador_perdeu_rodada	#Correu do Truco
         #Aqui será calculado se o computador ira pedir seis ou não
-        _menu_pede_seis_jogador:
-        addl    $2, pontos_mao
+        #_menu_aceita_truco_ou_seis_maquina: #Pede seis ou aceita o truco
+        addl    $2, pontos_mao				#Soma Ponto para Três
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
@@ -1038,13 +1126,31 @@
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
         cmpl    $0, %edx                    #50%  de chance de ser 0
-        je      _menu_responde_seis_jogador
+        je      _menu_responde_seis_jogador	#Computador Pediu Seis
         pushl   $print_computador_aceitou
         call    printf
         jmp     _menu_cartas
 
-        _menu_responde_seis_jogador:
-        movl    $1, ultimo_truco #Truco está com o computador
+        _menu_pede_truco_maquina:
+        movl    $2, ultimo_truco #Truco está com o computador
+        pushl   $print_computador_pediu_truco
+        call    printf
+        pushl   $rgeral
+        pushl   $formato_numero
+        call    scanf
+        movl    $rgeral, %eax
+        cmpl    $3, (%eax)
+        je      _jogador_perdeu_rodada #joao
+
+        addl    $2, pontos_mao #Soma Ponto para Três
+        cmpl    $2, (%eax)
+        je      _menu_responde_seis_maquina
+
+        jmp     _computador_faz_jogada
+
+
+        _menu_responde_seis_jogador: #Entra aqui quando pede seis
+        movl    $2, ultimo_truco #Truco está com o computador
         pushl   $print_computador_pediu_seis
         call    printf
         pushl   $rgeral
@@ -1052,14 +1158,19 @@
         call    scanf
         addl    $12, %esp
         movl    $rgeral, %eax
-        cmpl    $1, (%eax)
-        je      _menu_pede_nove_jogador
-        cmpl    $2, (%eax)
+        cmpl    $3, (%eax)
+
+
         je      _jogador_perdeu_rodada #joao
-        _menu_pede_nove_jogador:
-        #Aqui será calculado se o computador ira correr ou não do nove
-        addl    $3, pontos_mao
-        movl    $0, ultimo_truco #joao #Truco está com o jogador
+
+        addl    $3, pontos_mao #Soma Ponto para Seis
+        cmpl    $2, (%eax)
+        je      _menu_responde_nove_maquina
+        #call    printf
+        jmp     _menu_cartas
+
+        _menu_responde_seis_maquina:
+        movl    $1, ultimo_truco #Truco está com o jogador
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
@@ -1067,10 +1178,9 @@
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
         cmpl    $0, %edx                    #50%  de chance de ser 0
-        je      _computador_perdeu_rodada #joao
-        #Aqui será calculado se o computador ira pedir doze ou não
-        _menu_pede_doze_jogador:
-        addl    $2, pontos_mao
+        je      _computador_perdeu_rodada
+
+        addl    $3, pontos_mao 				#Soma Ponto para Seis
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
@@ -1078,11 +1188,86 @@
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
         cmpl    $0, %edx                    #50%  de chance de ser 0
-        je      _menu_responde_seis_jogador
+        je      _menu_responde_nove_jogador
         pushl   $print_computador_aceitou
         call    printf
+        jmp     _computador_faz_jogada
+
+        _menu_responde_nove_maquina:
+        #Aqui será calculado se o computador ira correr ou não do nove
+
+        movl    $1, ultimo_truco #joao #Truco está com o jogador
+        call    rand                        #gera numero randomico
+        pushl   %eax                        #eax contem o numero randomico
+        movl    $0, %edx                    #limpando edx
+        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        divl    %ebx
+        pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+        cmpl    $0, %edx                    #50%  de chance de ser 0
+        je      _computador_perdeu_rodada
+
+
+        addl    $3, pontos_mao #Soma Ponto para Nove
+        call    rand                        #gera numero randomico
+        pushl   %eax                        #eax contem o numero randomico
+        movl    $0, %edx                    #limpando edx
+        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        divl    %ebx
+        pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+        cmpl    $0, %edx                    #50%  de chance de ser 0
+        je      _menu_responde_doze_jogador
+        pushl   $print_computador_aceitou
+        call    printf
+        jmp     _computador_faz_jogada
+
+        _menu_responde_nove_jogador:
+        movl    $2, ultimo_truco #Truco está com o computador
+        ushl    $print_computador_pediu_nove
+        call    printf
+        pushl   $rgeral
+        pushl   $formato_numero
+        call    scanf
+        addl    $12, %esp
+        movl    $rgeral, %eax
+        cmpl    $3, (%eax)
+        je      _jogador_perdeu_rodada
+
+        addl    $3, pontos_mao #Soma Ponto para Nove
+        cmpl    $2, (%eax)
+        je      _menu_responde_doze_maquina
+
         jmp     _menu_cartas
-        jmp     finalizar_programa
+
+        _menu_responde_doze_jogador:
+        movl    $2, ultimo_truco #Truco está com o jogador
+        pushl   $print_computador_pediu_doze
+        call    printf
+        pushl   $rgeral
+        pushl   $formato_numero
+        call    scanf
+        addl    $12, %esp
+        movl    $rgeral, %eax
+        cmpl    $2, (%eax)
+        je      _jogador_perdeu_rodada
+        addl    $3, pontos_mao #Soma Ponto para Doze
+        call    printf
+        jmp     _menu_cartas
+
+        _menu_responde_doze_maquina:
+        #Aqui será calculado se o computador ira correr ou não do nove
+        movl    $1, ultimo_truco #Truco está com o jogador
+        call    rand                        #gera numero randomico
+        pushl   %eax                        #eax contem o numero randomico
+        movl    $0, %edx                    #limpando edx
+        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        divl    %ebx
+        pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+        cmpl    $0, %edx                    #50%  de chance de ser 0
+        je      _computador_perdeu_rodada
+
+        pushl   $print_computador_aceitou
+        call    printf
+        jmp     _computador_faz_jogada
 
 
 
@@ -1216,14 +1401,29 @@
         je      _maquina_vencedor_rodada
         cmpl    $2, rodadas_vencidas_j
         je      _jogador_vencedor_rodada
+        movl    $rodadas, %edi
+        cmpl    $3, (%edi)
+        je      _primeira_rodada_empatada
+        _retorno_empate:
         ret
+        _primeira_rodada_empatada:
+        addl    $4, %edi
+        cmpl    $1, (%edi)
+        je      _jogador_vencedor_rodada
+        cmpl    $2, (%edi)
+        je      _maquina_vencedor_rodada
+        jmp     _retorno_empate
 
         _jogador_vencedor_rodada:
-        addl   $1, pontos_jogador
+        movl	pontos_jogador, %eax
+        addl    pontos_mao, %eax
+        movl	%eax, pontos_jogador
         jmp     _inicia_mao
 
         _maquina_vencedor_rodada:
-        addl    $1, pontos_computador
+        movl	pontos_computador, %eax
+        addl    pontos_mao, %eax
+        movl	%eax, pontos_computador
         jmp     _inicia_mao
 
         pausa_sistema:
