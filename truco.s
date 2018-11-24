@@ -29,7 +29,6 @@
         print_iguais:                   .asciz " %d e %d"
         print_diferentes:               .asciz "Estas cartas são diferentes!"
         print_comparando:               .asciz "Comparando %d e %d\n"
-        print_gerou_certo:              .asciz "deu certo caraio!!!!!!!!!!!!!!!!\n"
         jogador_jogou_carta:            .asciz "Você jogou a carta:      %s de %s\n"
 		jogador_escondeu_carta:            .asciz "Você escondeu a carta:      %s de %s\n"
         maquina_jogou_carta:            .asciz "A máquina jogou a carta: %s de %s\n"
@@ -1584,8 +1583,6 @@
 
         finalizar_programa:
         pushl   $quebra_linha
-        call    printf
-        pushl   $print_gerou_certo
         call    printf
         pushl   $0
         call    exit
