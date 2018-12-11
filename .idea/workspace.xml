@@ -3,9 +3,9 @@
   <component name="BookmarkManager">
     <bookmark url="file://$PROJECT_DIR$/truco.s" line="1608" mnemonic="3" />
     <bookmark url="file://$PROJECT_DIR$/truco.s" line="1546" mnemonic="4" />
-    <bookmark url="file://$PROJECT_DIR$/truco.s" line="1352" mnemonic="7" />
+    <bookmark url="file://$PROJECT_DIR$/truco.s" line="1394" mnemonic="7" />
     <bookmark url="file://$PROJECT_DIR$/truco.s" line="25" mnemonic="9" />
-    <bookmark url="file://$PROJECT_DIR$/truco.s" line="1377" mnemonic="8" />
+    <bookmark url="file://$PROJECT_DIR$/truco.s" line="1419" mnemonic="8" />
     <bookmark url="file://$PROJECT_DIR$/truco.s" line="1647" mnemonic="1" />
   </component>
   <component name="ChangeListManager">
@@ -36,8 +36,8 @@
       <file leaf-file-name="truco.s" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/truco.s">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.42009884">
-              <caret line="14" column="48" selection-start-line="14" selection-start-column="48" selection-end-line="14" selection-end-column="48" />
+            <state vertical-scroll-proportion="0.41186163">
+              <caret line="1115" column="35" selection-start-line="1115" selection-start-column="35" selection-end-line="1115" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -400,8 +400,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/truco.s">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.42009884">
-          <caret line="14" column="48" selection-start-line="14" selection-start-column="48" selection-end-line="14" selection-end-column="48" />
+        <state vertical-scroll-proportion="0.41186163">
+          <caret line="1115" column="35" selection-start-line="1115" selection-start-column="35" selection-end-line="1115" selection-end-column="35" />
           <folding />
         </state>
       </provider>
