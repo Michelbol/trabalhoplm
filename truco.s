@@ -82,7 +82,7 @@
         rodada:             .int 0
         pontos_mao:         .int 0
         pontos_jogador:     .int 0
-        pontos_computador:  .int 11
+        pontos_computador:  .int 0
         manilha:            .int 0
         rodadas_vencidas_m: .int 0
         rodadas_vencidas_j: .int 0
@@ -1168,6 +1168,7 @@
         movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+        addl    $8, %esp
         cmpl    $0, %edx                    #50%  de chance de ser 0
         je      _computador_perdeu_rodada	#Correu do Truco
         #Aqui será calculado se o computador ira pedir seis ou não
@@ -1179,10 +1180,12 @@
         movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
+        addl    $8, %esp
         cmpl    $0, %edx                    #50%  de chance de ser 0
         je      _menu_responde_seis_jogador	#Computador Pediu Seis
         pushl   $print_computador_aceitou
         call    printf
+        addl    $4, %esp
         jmp     _menu_cartas
 
         _menu_pede_truco_maquina:
