@@ -1122,14 +1122,16 @@
         cmpl $12, pontos_mao
         je segue_jogada_computador
 
+        call _verifica_cartas_maquina #Aqui volta %ebx
+
 		#Calcula chance da maquina nao pedir truco
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
-        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        #movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
-		addl	$8, %esp #limpa pilha
+		addl	$8, %esp                    #limpa pilha
 
         cmpl    $0, %edx                    #50%  de chance de ser 0
         je      segue_jogada_computador	#Nao vai pedir truco
@@ -1161,11 +1163,13 @@
 		cmpl	$9, pontos_mao
 		je		_menu_responde_doze_maquina
 
+        call _verifica_cartas_maquina #Aqui volta %ebx
+
         #Aqui será calculado se o computador ira correr ou não
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
-        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        #movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
         addl    $8, %esp
@@ -1177,7 +1181,7 @@
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
-        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        #movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
         addl    $8, %esp
@@ -1225,11 +1229,12 @@
         jmp     segue_jogada_computador
 
         _menu_responde_seis_maquina:
+        call _verifica_cartas_maquina #Aqui volta %ebx
         movl    $1, ultimo_truco #Truco está com o jogador
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
-        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        #movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
 		addl	$8, %esp
@@ -1239,7 +1244,7 @@
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
-        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        #movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
 		addl	$8, %esp
@@ -1254,11 +1259,12 @@
 
         _menu_responde_nove_maquina:
         #Aqui será calculado se o computador ira correr ou não do nove
+        call _verifica_cartas_maquina #Aqui volta %ebx
         movl    $1, ultimo_truco #joao #Truco está com o jogador
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
-        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        #movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
 		addl	$8, %esp
@@ -1268,7 +1274,7 @@
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
-        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        #movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
 		addl	$8, %esp
@@ -1318,11 +1324,12 @@
 
         _menu_responde_doze_maquina:
         #Aqui será calculado se o computador ira correr ou não do nove
+        call    _verifica_cartas_maquina #Aqui volta %ebx
         movl    $1, ultimo_truco #Truco está com o jogador
         call    rand                        #gera numero randomico
         pushl   %eax                        #eax contem o numero randomico
         movl    $0, %edx                    #limpando edx
-        movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+        #movl    $2, %ebx                    #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
         divl    %ebx
         pushl   %edx                        #pegando o resto da divisao como aleatorio entre 0 e 2
 		addl	$8, %esp
@@ -1348,7 +1355,7 @@
         addl    %eax, %edi
         movl    $1, (%edi)
         addl    $1, rodadas_vencidas_j
-        pushl   $print_jogador_ganhou_mao
+        pushl   $print_jogador_ganhou_tento
         call    printf
         addl    $4, %esp
         movl    $pontos_computador, %eax
@@ -1367,7 +1374,7 @@
         addl    %eax, %edi
         movl    $2, (%edi)
         addl    $1, rodadas_vencidas_m
-        pushl   $print_computador_ganhou_mao
+        pushl   $print_computador_ganhou_tento
         call    printf
         addl    $4, %esp
         movl    $pontos_computador, %eax
@@ -1652,9 +1659,10 @@
          pushl   $print_mao_onze_maquina
          call    printf
          addl    $4, %esp
+         call   _verifica_cartas_maquina #Aqui volta %ebx
          call    rand
          movl    $0, %edx                    #limpando edx
-         movl    $2, %ebx                   #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
+         #movl    $2, %ebx                   #iremos pegar apenas numeros entre 0 e 1 assim teremos que dividir por 2
          divl    %ebx
          movl    %edx, rgeral
          cmpl    $1, rgeral              #1 o computador vai fugir, 0 ele vai jogar
@@ -1673,6 +1681,38 @@
         jmp _computador_perdeu_rodada
      ret
 
+     #Ve quantas cartas boas o computador tem diminui por 5 e devolve em %ebx (Carta boa é a carta acima ou igual a AS)
+    _verifica_cartas_maquina:
+        movl $5, %ebx
+        movl $cartas_sortiadas, %edi
+        addl $12, %edi
+        movl (%edi), %eax
+        cmpl $49, %eax
+        jg   soma1
+        cmpl manilha, %eax
+        jl   continua1
+        soma1:
+        subl $1, %ebx
+        continua1:
+        addl $4, %edi
+        movl (%edi), %eax
+        cmpl $49, %eax
+        jg   soma2
+        cmpl manilha, %eax
+        jl   continua2
+        soma2:
+        subl $1, %ebx
+        continua2:
+        addl $4, %edi
+        movl (%edi), %eax
+        cmpl $49, %eax
+        jg   soma3
+        cmpl manilha, %eax
+        jl   continua3
+        soma3:
+        subl $1, %ebx
+        continua3:
+    ret
 
     .globl _start
         _start:
